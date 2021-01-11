@@ -1,0 +1,114 @@
+<!--文档查询表的字段通用布局-->
+
+<table class="table table-sm table-borderless mt-3">
+    <!--        #table-borderless-->
+    <tbody>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputTitle" class="col-md-5 col-form-label">按标题词查询</label>
+                <div class="col-md-7">
+                    <input type="text" class="form-control" id="inputTitle" name="inputTitle"
+                           value="{{ request.form['inputTitle'] }}">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="row ms-5">
+                <label for="inputHeader" class="col-md-3 col-form-label">按文号查询</label>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" id="inputHeader" name="inputHeader"
+                           value="{{ request.form['inputHeader'] }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="inputYear" name="inputYear" min="2000" max="2064"
+                           value="{{ request.form['inputYear'] }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="inputNum" name="inputNum" min="1"
+                           value="{{ request.form['inputNum'] }}">
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputSendto" class="col-md-5 col-form-label">按主送单位查询</label>
+                <div class="col-md-7">
+                    <input type="text" class="form-control" id="inputSendto" name="inputSendto"
+                           value="{{ request.form['inputSendto'] }}">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="row ms-5">
+                <label for="inputBDate" class="col-md-3 col-form-label">按印发日期</label>
+                <div class="col-md-4">
+                    <input type="date" class="form-control" id="inputBDate" name="inputBDate" min=2000-01-01
+                            max=2064-12-31 value={{request.form['inputBDate']}}>
+                </div>
+                <div class="col-md-4">
+                    <input type="date" class="form-control" id="inputEDate" name="inputEDate" min=2000-01-01
+                           max=2064-12-31 value="{{ request.form['inputEDate'] }}">
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputCreater" class="col-md-5 col-form-label">按拟稿人查询</label>
+                <div class="col-md-7">
+                    <input type="text" class="form-control" id="inputCreater" name="inputCreater"
+                           value="{{ request.form['inputCreater'] }}">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="row ms-5">
+                <label for="inputType" class="col-md-3 col-form-label">按文种类别查询</label>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="inputType" name="inputType"
+                           value="{{ request.form['inputType'] }}">
+                </div>
+                <label for="inputHasAttach" class="col-md-2 col-form-label ms-5">按有无附件</label>
+                <div class="col-md-3">
+                    <select name="hasAttach" id="inputHasAttach" class="form-select">
+<!--                        Summit后保留select选项的选择状态-->
+                        {% if request.form['hasAttach']=='有正文' %}
+                            {% set var_valid = 'selected' %}
+                        {% elif request.form['hasAttach']=='无' %}
+                            {% set var_none = 'selected' %}
+                        {% endif %}
+                        <option value="全部" >全部</option>
+                        <option value="有正文" {{var_valid}} >有正文</option>
+                        <option value="无" {{var_none}} >无文档</option>
+                    </select>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputMemo" class="col-md-5 col-form-label">按备注内容查询</label>
+                <div class="col-md-7">
+                    <input type="text" class="form-control" id="inputMemo" name="inputMemo"
+                           value="{{ request.form['inputMemo'] }}">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="row ms-5">
+                <label for="inputPublic" class="col-md-3 col-form-label">按信息公开选项查询</label>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="inputPublic" name="inputPublic"
+                           value="{{ request.form['inputPublic'] }}">
+                </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+

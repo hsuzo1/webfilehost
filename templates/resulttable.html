@@ -1,0 +1,73 @@
+<table class="table table-striped table-hover table-sm align-middle" style="font-size:14px;">
+    <thead class="text-center sticky-top fs-6 table-dark">
+    <tr class="align-middle">
+        <th class="sticky-top tf" scope="col">序号</th>
+        <th class="sticky-top tf" scope="col">编号</th>
+        <th class="sticky-top tf" scope="col">发文字号</th>
+        <th class="sticky-top tf" scope="col">密级</th>
+        <th class="sticky-top tf" scope="col">文件标题</th>
+        <th class="sticky-top tf" scope="col">主送单位</th>
+        <th class="sticky-top tf" scope="col">拟稿人</th>
+        <th class="sticky-top tf" scope="col">印发日期</th>
+        <th class="sticky-top tf" scope="col">公开选项</th>
+        <th class="sticky-top tf" scope="col">正文文档</th>
+        <th class="sticky-top tf" scope="col">附件文档</th>
+        <th class="sticky-top tf" scope="col">备注</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if tasks %}
+    {% for task in tasks %}
+    <tr>
+        <td>{{loop.index}}</td>
+        <td class="text-center">{{task.id}}</td>
+        <td class="text-center">{{task.filenumber}}</td>
+        <td class="text-center">{{task.miji}}</td>
+        <td>{{task.title}}</td>
+        <td>{{task.sendto}}</td>
+        <td class="text-center">{{task.creater}}</td>
+        <td class="text-center">{{task.crtime.strftime("%Y-%m-%d")}}</td>
+        <td class="text-center">{{task.xxgk}}</td>
+        <td class="text-center">
+            {% if task.mainfile|striptags !="无" %}
+            <a href="/mainfile/{{task.id}}" style="display:block" id="a_{{task.id}}">
+                <button class="btn btn-warning btn-sm" type="button">查看</button>
+            </a>
+            {% else %}
+            <form action="/upload/main/{{task.id}}" id="upload{{task.id}}" name="uploadMain{{task.id}}" method="POST"
+                  enctype="multipart/form-data" style="display:block">
+                <label class="btn btn-secondary btn-sm" for="file{{task.id}}" id="btn{{task.id}}">上传</label>
+                <input type="file" name="main{{task.id}}" id="file{{task.id}}" style="display:none"
+                       onchange="javascript:document.getElementById('upload{{task.id}}').submit();"
+                       autocomplete="off"
+                       accept=".pdf, .jpg, .bmp, .png, .gif, .rar, .zip, .doc, .docx"
+                       required/>
+            </form>
+            {% endif %}
+        </td>
+        <td class="text-center">
+            {% if task.mainfile1|striptags !="无" %}
+            <a href="/mainfile1/{{task.id}}">
+                <button class="btn btn-warning btn-sm" type="button">查看</button>
+            </a>
+            {% else %}
+            <form action="/upload/attach/{{task.id}}" id="upAttach{{task.id}}" name="uploadAttach{{task.id}}"
+                  method="POST"
+                  enctype="multipart/form-data">
+                <label class="btn btn-secondary btn-sm" for="attach{{task.id}}" id="btnAttach{{task.id}}">上传</label>
+                <input type="file" name="attach{{task.id}}" id="attach{{task.id}}" style="display:none"
+                       onchange="javascript:document.getElementById('upAttach{{task.id}}').submit();"
+                       autocomplete="off"
+                       accept=".pdf, .jpg, .bmp, .png, .gif, .rar, .zip, .doc, .docx"
+                       required/>
+            </form>
+            {% endif %}
+        </td>
+        <td>{{task.memo1}}</td>
+    </tr>
+
+    {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
+

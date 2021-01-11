@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block head %}
+文档查询 -
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <!--提示信息-->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>提示：</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <form action="/qry" method="POST" id="qryForm">
+        {% include 'basetag.html' %}
+        <div class="row text-center">
+            <div class="col-4">
+                <a href="/clear">
+                    <button class="btn btn-primary" type="button">清空查询</button>
+                </a>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-primary" type="submit">查询数据</button>
+            </div>
+            <div class="col-4">
+                <a href="/export" role="button" class="btn btn-primary">导出数据</a>
+            </div>
+        </div>
+    </form>
+</div>
+<br>
+
+<!--显示查询结果表格-->
+{% include 'resulttable.html' %}
+
+{% endblock %}
+
+
+<!--enctype="multipart/form-data"-->

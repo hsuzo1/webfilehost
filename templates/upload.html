@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block head %}
+上传文档 -
+{% endblock %}
+
+{% block body %}
+
+<form method="POST" action="/upload/main/{{id}}" id="test_form" enctype="multipart/form-data">
+    <div class="container col-5  mt-5">
+        <div class="card text-center">
+            <div class="card-header">
+                <h3 class="m-2">上传文件</h3>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{target}}{{id}}</h5>
+                <br>
+                <p class="card-text">允许上传的文件类型：<b>pdf，zip，doc，docx以及各种类型图片</b></p>
+                <br>
+                <input class="form-control" id="formFileLg" type="file" name="file"
+                       accept="application/pdf,application/zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*">
+                <br>
+                <button class="btn btn-primary" type="submit">&nbsp;确定上传文件&nbsp;</button>
+            </div>
+            <div class="card-footer text-muted">
+                &nbsp;
+            </div>
+        </div>
+    </div>
+
+
+</form>
+
+<button class="btn btn-success" onclick="ajaxForm()">AJAX</button>
+
+<button class="btn btn-success" id="test" onclick="alert('be clicked!');">Click Me</button>
+
+<script type="text/javascript">
+    function ajaxForm(){
+        var form = new FormData(document.getElementById("test_form"));
+        $.ajax({
+            url:"/add",
+            type:"POST",
+            data:form,
+            dataType:'json',
+            processData:false,
+            contentType:false,
+            success:function(data){
+                $("#test").click();
+                },
+            error:function(e){
+                alert("no");
+                }
+        })
+    }
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+
+{% endblock %}
