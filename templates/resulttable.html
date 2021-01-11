@@ -1,3 +1,34 @@
+<!-- 隐藏的模态窗口按钮 -->
+<button type="button" class="btn" id="spinner" data-bs-toggle="modal"
+        data-bs-target="#staticBackdrop" style="display:none">
+    Launch modal
+</button>
+
+<!-- 模态窗口显示上传信息 -->
+<div class="modal" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog mt-5">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">提醒</h5>
+                <button type="button" class="btn-close" id="btn_Close_Modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center">
+                    <br><br>
+                    <strong>文件正在上传中，请勿关闭中断操作...</strong>
+                    <br><br>
+                    <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <table class="table table-striped table-hover table-sm align-middle" style="font-size:14px;">
     <thead class="text-center sticky-top fs-6 table-dark">
     <tr class="align-middle">
@@ -30,15 +61,19 @@
         <td class="text-center">{{task.xxgk}}</td>
         <td class="text-center">
             {% if task.mainfile|striptags !="无" %}
-            <a href="/mainfile/{{task.id}}" style="display:block" id="a_{{task.id}}">
+            <a href="/mainfile/{{task.id}}" style="display:block">
                 <button class="btn btn-warning btn-sm" type="button">查看</button>
             </a>
             {% else %}
-            <form action="/upload/main/{{task.id}}" id="upload{{task.id}}" name="uploadMain{{task.id}}" method="POST"
+            <a href="/mainfile/{{task.id}}" style="display:none" id="view_main{{task.id}}">
+                <button class="btn btn-warning btn-sm" type="button">查看</button>
+            </a>
+            <form action="/upload/main/{{task.id}}" id="upload_main{{task.id}}" name="uploadMain{{task.id}}"
+                  method="POST"
                   enctype="multipart/form-data" style="display:block">
                 <label class="btn btn-secondary btn-sm" for="file{{task.id}}" id="btn{{task.id}}">上传</label>
                 <input type="file" name="main{{task.id}}" id="file{{task.id}}" style="display:none"
-                       onchange="javascript:document.getElementById('upload{{task.id}}').submit();"
+                       onchange="ajaxForm('upload_main{{task.id}}', '{{task.id}}', 'main')();"
                        autocomplete="off"
                        accept=".pdf, .jpg, .bmp, .png, .gif, .rar, .zip, .doc, .docx"
                        required/>
@@ -51,12 +86,15 @@
                 <button class="btn btn-warning btn-sm" type="button">查看</button>
             </a>
             {% else %}
-            <form action="/upload/attach/{{task.id}}" id="upAttach{{task.id}}" name="uploadAttach{{task.id}}"
+            <a href="/mainfile1/{{task.id}}" style="display:none" id="view_attach{{task.id}}">
+                <button class="btn btn-warning btn-sm" type="button">查看</button>
+            </a>
+            <form action="/upload/attach/{{task.id}}" id="upload_attach{{task.id}}" name="uploadAttach{{task.id}}"
                   method="POST"
-                  enctype="multipart/form-data">
-                <label class="btn btn-secondary btn-sm" for="attach{{task.id}}" id="btnAttach{{task.id}}">上传</label>
+                  enctype="multipart/form-data" style="display:block">
+                <label class="btn btn-secondary btn-sm" for="attach{{task.id}}" id="btn_attach{{task.id}}">上传</label>
                 <input type="file" name="attach{{task.id}}" id="attach{{task.id}}" style="display:none"
-                       onchange="javascript:document.getElementById('upAttach{{task.id}}').submit();"
+                       onchange="ajaxForm('upload_attach{{task.id}}', '{{task.id}}', 'attach')();"
                        autocomplete="off"
                        accept=".pdf, .jpg, .bmp, .png, .gif, .rar, .zip, .doc, .docx"
                        required/>
@@ -65,9 +103,39 @@
         </td>
         <td>{{task.memo1}}</td>
     </tr>
-
     {% endfor %}
     {% endif %}
     </tbody>
 </table>
 
+
+<!-- ajax方法上传文件到服务器，并取得反馈信息。 -->
+<script type="text/javascript">
+    function ajaxForm(obj, id, type){
+    event.preventDefault();
+    var form= new FormData(document.getElementById(obj));
+<!--    显示模态进度窗口-->
+    $('#spinner').click();
+<!--    异步上传文件-->
+    $.ajax({
+        url:"/upload/" +type+ "/" + id,
+        type:"post",
+        data:form,
+        dataType: 'json',
+        processData:false,
+        contentType:false,
+        success:function(data){
+                $('#msg_span').text(data.msg);
+                $('#msg').show();
+                $('#btn_Close_Modal').click();
+                $('#upload_' + type + id).attr("style", "display:none;");
+                $('#view_' + type + id).attr("style", "display:block;");
+        },
+        error:function(e){
+                $('#btn_Close_Modal').click();
+                alert(data.msg);
+        },
+    });
+}
+</script>
+<script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>

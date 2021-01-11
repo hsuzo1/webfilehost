@@ -7,16 +7,11 @@
 {% block body %}
 <div class="container">
     <!--提示信息-->
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <strong>提示：</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert alert-warning alert-dismissible fade show" id="msg" role="alert" style="display:none">
+        <strong>提示：</strong><span id="msg_span"></span>
+        <button type="button" class="btn-close" id="msg_btn" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+<!--模糊查询要素提交及清空、结果导出-->
     <form action="/qry" method="POST" id="qryForm">
         {% include 'basetag.html' %}
         <div class="row text-center">
@@ -26,7 +21,7 @@
                 </a>
             </div>
             <div class="col-4">
-                <button class="btn btn-primary" type="submit">查询数据</button>
+                <button class="btn btn-primary" type="submit" id="btn_query">查询数据</button>
             </div>
             <div class="col-4">
                 <a href="/export" role="button" class="btn btn-primary">导出数据</a>
