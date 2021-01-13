@@ -49,7 +49,7 @@ Posts List -
                     </div>
                 </div>
                 &nbsp;
-                <a href="/update/{{task.id}}">
+                <a href="{{ url_for('update', id=task.id) }}">
                     <button class="btn btn-success btn-sm" type="button">Update</button>
                 </a>
             </td>

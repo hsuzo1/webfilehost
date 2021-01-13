@@ -1,35 +1,46 @@
 # -*- coding: utf-8 -*-
 import os
 from io import BytesIO
-from flask import Flask, render_template, url_for, request, redirect, send_file, jsonify, session, make_response
+from flask import Flask, render_template, url_for, request, redirect, send_file, jsonify, session, make_response, flash
 from sqlalchemy.orm import sessionmaker
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import pandas as pd
 from pandas import ExcelWriter
 from werkzeug.utils import secure_filename
 from config import engine
-from table import Flaskdemo, Qrymaininfo, Filetable
+from table import Flaskdemo, Qrymaininfo, Filetable, User, Dept
+from datetime import timedelta
+import json
 
 
 """
-1.添加登录、注销功能
+1.添加登录、注销功能 
+    2021.1.13完成
 2.添加管理员面板：人员、部门、文档权限
 3.添加管理员删除附件按钮
 """
 
 app = Flask(__name__)
 app.secret_key = "db112546-3fb3-43c3-b625-934603cd28a2"
+app.config['SECRET_KEY'] = "db112546-3fb3-43c3-b625-934603cd28a2"
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 最大20MB体积
+
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.login_message = u"请登录"
+login_manager.init_app(app)
+
 
 path = os.getcwd()
 UPLOAD_FOLDER = os.path.join(path, 'uploads')
 DOWNLOAD_TEMPDIR = os.path.join(path, 'downloads')
 # 建立文件上传下载文件夹
-if not os.path.isdir(UPLOAD_FOLDER):
-    os.mkdir(UPLOAD_FOLDER)
-if not os.path.isdir(DOWNLOAD_TEMPDIR):
-    os.mkdir(DOWNLOAD_TEMPDIR)
+# if not os.path.isdir(UPLOAD_FOLDER):
+#     os.mkdir(UPLOAD_FOLDER)
+# if not os.path.isdir(DOWNLOAD_TEMPDIR):
+#     os.mkdir(DOWNLOAD_TEMPDIR)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # 创建表
 # Base.metadata.create_all(engine)
@@ -37,12 +48,83 @@ Session = sessionmaker(bind=engine)
 dbsession = Session()
 
 
+# 上传文件函数
+def upload_file(id, filename, blob, flag):
+    check_record = dbsession.query(Filetable).filter(Filetable.id == id).first()
+    # 正文
+    if flag:
+        try:
+            if check_record:
+                check_record.filename = filename
+                check_record.fileblob = blob.read()
+            else:
+                new_tasks = Filetable(id=id, filename=filename, fileblob=blob.read())
+                dbsession.add(new_tasks)
+            dbsession.commit()
+        except:
+            dbsession.rollback()
+            return False
+    else:
+        try:
+            if check_record:
+                check_record.filename1 = filename
+                check_record.fileblob1 = blob.read()
+            else:
+                new_tasks = Filetable(id=id, filename1=filename, fileblob1=blob.read())
+                dbsession.add(new_tasks)
+            dbsession.commit()
+        except:
+            dbsession.rollback()
+            return False
+    return True
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return dbsession.query(User).get(int(user_id))
+
+
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html')
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == "POST":
+        deptNo = request.form.get('dept')
+        # 返回的是用户登录时的LoginNo
+        userId = request.form.get('usernames')
+        password = request.form.get('password')
+        remember = True if request.form.get('remember') else False
+        user = dbsession.query(User).filter(User.id==userId).first()
+        if not user or not (user.password.decode() == password):
+            flash('登录信息错误，请重试。')
+            return redirect(url_for('login'))
+        login_user(user, remember=remember)
+        # session['testname'] = 'test'
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=30)
+        return redirect(url_for('index'))
+    tasks = dbsession.query(Dept).all()
+    # password = str.encode(encoding="gb2312") utf-8
+    return render_template('login.html', tasks=tasks)
+
+
+# 查找用户名
+@app.route('/getuser/<int:dept>', methods=['POST'])
+def getUser(dept):
+    if request.method == 'POST':
+        userNames = dbsession.query(User).order_by(User.id).filter(User.deptNo==dept).all()
+        userDict = {}
+        for user in userNames:
+            userDict[str(user.id)] = user.username
+        return jsonify(userDict)
+
+
 @app.route('/posts', methods=['GET', 'POST'])
+@login_required
 def posts():
     if request.method == 'POST':
         task_content = request.form['content']
@@ -84,6 +166,7 @@ def update(id):
 
 
 @app.route('/qry', methods=['GET', 'POST'])
+@login_required
 def qry():
     if request.method == 'POST':
         title = request.form['inputTitle']
@@ -125,7 +208,7 @@ def qry():
             bdate, edate,
             Qrymaininfo.memo1.like("%{}%".format(memo)),
             Qrymaininfo.xxgk.like("%{}%".format(public))
-            )
+        )
         # 存储当前查询的SQL语句，用于数据导出
         session['sql'] = str(tasks.statement.compile(compile_kwargs={"literal_binds": True}))
         return render_template('query.html', tasks=tasks)
@@ -204,10 +287,10 @@ def upload_page(target, id):
         except:
             dbsession.rollback()
             msg = '新增记录错误'
-            return jsonify({'msg' : msg})
+            return jsonify({'msg': msg})
     else:
         try:
-            check_record = dbsession.query(Filetable).filter(Filetable.id==id).first()
+            check_record = dbsession.query(Filetable).filter(Filetable.id == id).first()
             if check_record:
                 check_record.filename1 = filename
                 check_record.fileblob1 = uploaded_file.read()
@@ -221,8 +304,8 @@ def upload_page(target, id):
             msg = '上传文件顺利完成！'
         except Exception as e:
             dbsession.rollback()
-            jsonify({'msg' : msg})
-    return jsonify({'msg' : msg})
+            jsonify({'msg': msg})
+    return jsonify({'msg': msg})
 
 
 # 导出查询结果为xlsx文件
@@ -265,20 +348,68 @@ def export():
     # IO对象使用getvalue()可以返回二进制的原始数据,用来给要生成的response的data
     resp = make_response(out.getvalue())
     # 设置response的header,让浏览器解析为文件下载行为
-    resp.headers['Content-Disposition'] = 'attachement; filename=querytable.xlsx'
+    resp.headers['Content-Disposition'] = 'attachement; filename=QueryTable.xlsx'
     resp.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8'
-
+    # resp.headers['Content-Length'] 获取文件大小（字节）
     return resp
 
 
 # 测试ajax
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
 def add():
     if request.method == 'POST':
-        filename = request.files['file'].filename
-        msg = '成功'
-        return jsonify({'filename' : filename, 'msg' : msg})
-    return render_template('upload.html')
+        # 检索最大ID号
+        maxID = dbsession.query(Qrymaininfo.id).order_by(Qrymaininfo.id.desc()).first().id + 1
+        title = request.form['inputTitle']
+        writer = request.form['inputCreater']
+        fileNumber = request.form['inputHeader'] + '[' + request.form['inputYear'] + ']' + request.form[
+            'inputNum'] + '号'
+        createDate = request.form['inputBDate']
+        sendTo = request.form['inputSendto']
+        fileType = request.form['inputType']
+        memo = request.form['inputMemo']
+        public = request.form['inputPublic']
+        miJi = request.form['miji']
+        # 是否有上传正文文档或附件文档
+        fileBlob = request.files['fileblob']
+        fileBlob1 = request.files['fileblob1']
+        has_mainFile = "无"
+        if fileBlob.filename !='':
+            has_mainFile = "有正文"
+        has_mainFile1 = "无"
+        if fileBlob1.filename !='':
+            has_mainFile1 = "有正文"
+        new_record = Qrymaininfo(id=maxID, filenumber=fileNumber, miji=miJi, title=title, sendto=sendTo,
+                                 ftype=fileType, creater=writer, crtime=createDate, xxgk=public,
+                                 mainfile=has_mainFile, mainfile1=has_mainFile1, memo1=memo, operdept="", operuser="")
+        try:
+            dbsession.add(new_record)
+            dbsession.commit()
+        except:
+            dbsession.rollback()
+
+        # 上传电子文档
+        if fileBlob.filename != '':
+            upload_file(maxID, fileBlob.filename, fileBlob, True)
+
+        if fileBlob1.filename != '':
+            upload_file(maxID, fileBlob1.filename, fileBlob1, False)
+
+        msg = 'done'
+        return jsonify({'msg': msg, 'title': request.form['inputBDate'], 'id': maxID})
+    # 此处增加科室权限检查
+    tasks = dbsession.query(Qrymaininfo).order_by(Qrymaininfo.id.desc()).filter(
+        Qrymaininfo.operdept.like("%{}%".format('经建一科'))).limit(10).all()
+    return render_template('new.html', tasks=tasks)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    # session.pop('testname', None)
+    return '<h1 style="text-align: center;margin-top: 10%;">You are now logged out!</h1>'
 
 
 @app.before_request
@@ -315,9 +446,5 @@ def teardown_request_b(exc):
     print('I am in teardown_request_b')
 
 
-
-
 if __name__ == "__main__":
     app.run(port=3000, debug=True)  # host='0.0.0.0',
-
-

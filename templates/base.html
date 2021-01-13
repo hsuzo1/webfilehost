@@ -23,31 +23,48 @@
 <body>
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="https://blog.hsuzo.cn/" target="_blank">财政公文管理系统</a>
+        <a class="navbar-brand" href="">财政公文管理系统</a>
         <div class="collapse navbar-collapse" id="navbarsExample02">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item active">
                     <a class="nav-link" aria-current="page" href="/">Home</a>
                 </li>
                 <li class="nav-item">
+                    {% if current_user.is_authenticated %}
                     <a class="nav-link" href="/posts">Posts</a>
+                    {% endif %}
                 </li>
                 <li class="nav-item">
+                    {% if current_user.is_authenticated %}
                     <a class="nav-link" href="/add">AddNew</a>
+                    {% endif %}
                 </li>
                 <li class="nav-item">
+                    {% if current_user.is_authenticated %}
                     <a class="nav-link" href="/qry">Query</a>
+                    {% endif %}
                 </li>
             </ul>
             <ul class="navbar-nav justify-content-end">
                 <li class="nav-item">
+                    {% if current_user.is_authenticated %}
                     <a class="nav-link" href="/setting">Setting</a>
+                    {% endif %}
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">Sign in</a>
+                    {% if not current_user.is_authenticated %}
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    {% endif %}
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">LogOut</a>
+                    {% if not current_user.is_authenticated %}
+                    <a class="nav-link" href="/signup">Sign Up</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if current_user.is_authenticated %}
+                    <a class="nav-link" href="{{ url_for('logout') }}">LogOut</a>
+                    {% endif %}
                 </li>
             </ul>
         </div>
@@ -58,7 +75,8 @@
     {% block body %}{% endblock %}
 </main>
 
-
+{% block login %}
+{% endblock %}
 
 <script src="{{url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script>
 </body>

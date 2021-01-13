@@ -38,3 +38,33 @@
 
 
 <!--enctype="multipart/form-data"-->
+<!-- ajax方法上传文件到服务器，并取得反馈信息。 -->
+<script type="text/javascript">
+    function ajaxForm(obj, id, type){
+    event.preventDefault();
+    var form= new FormData(document.getElementById(obj));
+<!--    显示模态进度窗口-->
+    $('#spinner').click();
+<!--    异步上传文件-->
+    $.ajax({
+        url:"/upload/" +type+ "/" + id,
+        type:"post",
+        data:form,
+        dataType: 'json',
+        processData:false,
+        contentType:false,
+        success:function(data){
+                $('#msg_span').text(data.msg);
+                $('#msg').show();
+                $('#btn_Close_Modal').click();
+                $('#upload_' + type + id).attr("style", "display:none;");
+                $('#view_' + type + id).attr("style", "display:block;");
+        },
+        error:function(e){
+                $('#btn_Close_Modal').click();
+                alert(data.msg);
+        },
+    });
+}
+</script>
+<script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block head %}
+欢迎登录 -
+{% endblock %}
+
+{% block login %}
+<div class="row justify-content-center">
+    <div class="text-center" style="position: absolute;top: 50%;transform: translateY(-50%);">
+        <div style="display:inline-block;width:250px;">
+            <h3 class="h3 mb-5" id="tl">公文管理系统</h3>
+            <div class="box">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ messages[0] }}
+                </div>
+                {% endif %}
+                {% endwith %}
+                <form method="POST" action="/login">
+                    <div>
+                        <select class="form-select" id="dept" name="dept" onchange="getuser()" required>
+                            <option value=""></option>
+                            {% if tasks|length > 1 %}
+                            {% for task in tasks %}
+                            <option value="{{task.id}}">{{ task.deptName }}</option>
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="control">
+                        <select class="form-select" id="usernames" name="usernames" required>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <div class="">
+                        <div class="control">
+                            <input class="form-control" type="password" name="password" placeholder="密码">
+                        </div>
+                    </div>
+                    <div class="checkbox mt-2 mb-4">
+                        <label>
+                            <input type="checkbox" value="remember-me">
+                            Remember me
+                        </label>
+                    </div>
+                    <button class="btn btn-success btn-lg" style="width:200px">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+<!--更新用户名-->
+    function getuser(){
+        $('#usernames').text("");
+<!--        $('#usernames').append('<option value=""></option>');-->
+        var dept = $("#dept").val()
+        $.ajax({
+            url:"/getuser/" + dept,
+            type:"post",
+            success:function(data){
+                for (var x in data) {
+                    $('#usernames').append('<option value=' + x + '>' + data[x] +'</option>');
+                    };
+            },
+        });
+    }
+</script>
+
+<script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+{% endblock %}
