@@ -28,9 +28,8 @@
     </div>
 </div>
 
-
 <table class="table table-striped table-hover table-sm align-middle" style="font-size:14px;">
-    <thead class="text-center sticky-top fs-6 table-dark">
+    <thead class="text-center sticky-top fs-6">
     <tr class="align-middle">
         <th class="sticky-top tf" scope="col">序号</th>
         <th class="sticky-top tf" scope="col">编号</th>
@@ -44,6 +43,7 @@
         <th class="sticky-top tf" scope="col">正文文档</th>
         <th class="sticky-top tf" scope="col">附件文档</th>
         <th class="sticky-top tf" scope="col">备注</th>
+        <th class="sticky-top tf" scope="col">维护</th>
     </tr>
     </thead>
     <tbody>
@@ -62,12 +62,13 @@
         <td class="text-center">
             {% if task.mainfile|striptags !="无" %}
             <a href="/mainfile/{{task.id}}" style="display:block">
-                <button class="btn btn-warning btn-sm" type="button">查看</button>
+                <button class="btn btn-success btn-sm" type="button">查看</button>
             </a>
             {% else %}
             <a href="/mainfile/{{task.id}}" style="display:none" id="view_main{{task.id}}">
-                <button class="btn btn-warning btn-sm" type="button">查看</button>
+                <button class="btn btn-success btn-sm" type="button">查看</button>
             </a>
+            {% if dept == task.operdept %}
             <form action="/upload/main/{{task.id}}" id="upload_main{{task.id}}" name="uploadMain{{task.id}}"
                   method="POST"
                   enctype="multipart/form-data" style="display:block">
@@ -79,16 +80,18 @@
                        required/>
             </form>
             {% endif %}
+            {% endif %}
         </td>
         <td class="text-center">
             {% if task.mainfile1|striptags !="无" %}
             <a href="/mainfile1/{{task.id}}">
-                <button class="btn btn-warning btn-sm" type="button">查看</button>
+                <button class="btn btn-success btn-sm" type="button">查看</button>
             </a>
             {% else %}
             <a href="/mainfile1/{{task.id}}" style="display:none" id="view_attach{{task.id}}">
-                <button class="btn btn-warning btn-sm" type="button">查看</button>
+                <button class="btn btn-success btn-sm" type="button">查看</button>
             </a>
+            {% if dept == task.operdept %}
             <form action="/upload/attach/{{task.id}}" id="upload_attach{{task.id}}" name="uploadAttach{{task.id}}"
                   method="POST"
                   enctype="multipart/form-data" style="display:block">
@@ -100,8 +103,16 @@
                        required/>
             </form>
             {% endif %}
+            {% endif %}
         </td>
         <td>{{task.memo1}}</td>
+        <td class="text-center">
+            {% if (userName == task.creater) or (canUpdate == "A") %}
+            <a href="#">
+                <button class="btn btn-danger btn-sm" type="button">修改</button>
+            </a>
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
     {% endif %}

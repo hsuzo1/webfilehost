@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 import os
 from io import BytesIO
-from flask import Flask, render_template, url_for, request, redirect, send_file, jsonify, session, make_response, flash
+from flask import Flask, render_template, url_for, request, redirect, send_file, jsonify, \
+    session, make_response, flash
 from sqlalchemy.orm import sessionmaker
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user
 import pandas as pd
 from pandas import ExcelWriter
 from werkzeug.utils import secure_filename
 from config import engine
 from table import Flaskdemo, Qrymaininfo, Filetable, User, Dept
 from datetime import timedelta
-import json
-
 
 """
 1.添加登录、注销功能 
@@ -29,7 +28,6 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.login_message = u"请登录"
 login_manager.init_app(app)
-
 
 path = os.getcwd()
 UPLOAD_FOLDER = os.path.join(path, 'uploads')
@@ -94,16 +92,23 @@ def index():
 def login():
     if request.method == "POST":
         deptNo = request.form.get('dept')
+        dept = dbsession.query(Dept).filter(Dept.id == deptNo).first()
         # 返回的是用户登录时的LoginNo
         userId = request.form.get('usernames')
         password = request.form.get('password')
         remember = True if request.form.get('remember') else False
-        user = dbsession.query(User).filter(User.id==userId).first()
+        user = dbsession.query(User).filter(User.id == userId).first()
         if not user or not (user.password.decode() == password):
             flash('登录信息错误，请重试。')
             return redirect(url_for('login'))
         login_user(user, remember=remember)
-        # session['testname'] = 'test'
+        session['userName'] = user.username
+        session['deptName'] = dept.deptName
+        session['fileHeader'] = dept.fileHeader
+        if user.canUpdate is not None:
+            session['canUpdate'] = user.canUpdate
+        else:
+            session['canUpdate'] = 'N'
         session.permanent = True
         app.permanent_session_lifetime = timedelta(minutes=30)
         return redirect(url_for('index'))
@@ -116,7 +121,7 @@ def login():
 @app.route('/getuser/<int:dept>', methods=['POST'])
 def getUser(dept):
     if request.method == 'POST':
-        userNames = dbsession.query(User).order_by(User.id).filter(User.deptNo==dept).all()
+        userNames = dbsession.query(User).order_by(User.id).filter(User.deptNo == dept).all()
         userDict = {}
         for user in userNames:
             userDict[str(user.id)] = user.username
@@ -165,10 +170,15 @@ def update(id):
         return render_template('update.html', task=task)
 
 
+# 文档查询视图
 @app.route('/qry', methods=['GET', 'POST'])
 @login_required
 def qry():
     if request.method == 'POST':
+        # 获取部门名称，以限制上传权限
+        deptName = session['deptName']
+        canUpdate = session['canUpdate']
+        userName = session['userName']
         title = request.form['inputTitle']
         header = request.form['inputHeader']
         syear = request.form['inputYear']
@@ -211,9 +221,9 @@ def qry():
         )
         # 存储当前查询的SQL语句，用于数据导出
         session['sql'] = str(tasks.statement.compile(compile_kwargs={"literal_binds": True}))
-        return render_template('query.html', tasks=tasks)
+        return render_template('query.html', tasks=tasks, dept=deptName, userName=userName, canUpdate=canUpdate)
     else:
-        return render_template('query.html', )
+        return render_template('query.html')
 
 
 # 重置输入内容
@@ -316,7 +326,7 @@ def export():
         Returns: xlsx文件
     """
     # 实例化字节类型IO对象,用来在内存中存储对象,不用在磁盘上生成临时文件了
-    out = BytesIO()
+    out: BytesIO = BytesIO()
     # 实例化输出xlsx的writer对象
     writer = ExcelWriter(out, engine='openpyxl')
     # 将SQLAlchemy模型的查询对象拆分SQL语句和连接属性传给pandas的read_sql方法
@@ -354,10 +364,12 @@ def export():
     return resp
 
 
-# 测试ajax
+# 新建发文登记
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add():
+    operName = session['userName']
+    deptName = session['deptName']
     if request.method == 'POST':
         # 检索最大ID号
         maxID = dbsession.query(Qrymaininfo.id).order_by(Qrymaininfo.id.desc()).first().id + 1
@@ -375,40 +387,65 @@ def add():
         fileBlob = request.files['fileblob']
         fileBlob1 = request.files['fileblob1']
         has_mainFile = "无"
-        if fileBlob.filename !='':
+        if fileBlob.filename != '':
             has_mainFile = "有正文"
         has_mainFile1 = "无"
-        if fileBlob1.filename !='':
+        if fileBlob1.filename != '':
             has_mainFile1 = "有正文"
         new_record = Qrymaininfo(id=maxID, filenumber=fileNumber, miji=miJi, title=title, sendto=sendTo,
                                  ftype=fileType, creater=writer, crtime=createDate, xxgk=public,
-                                 mainfile=has_mainFile, mainfile1=has_mainFile1, memo1=memo, operdept="", operuser="")
+                                 mainfile=has_mainFile, mainfile1=has_mainFile1, memo1=memo, operdept=deptName,
+                                 operuser=operName)
         try:
             dbsession.add(new_record)
             dbsession.commit()
         except:
             dbsession.rollback()
 
-        # 上传电子文档
+        # 连带上传电子文档
         if fileBlob.filename != '':
             upload_file(maxID, fileBlob.filename, fileBlob, True)
-
         if fileBlob1.filename != '':
             upload_file(maxID, fileBlob1.filename, fileBlob1, False)
+        # return jsonify({'msg': fileNumber, 'id': maxID})
 
-        msg = 'done'
-        return jsonify({'msg': msg, 'title': request.form['inputBDate'], 'id': maxID})
+        tasks = dbsession.query(Qrymaininfo).order_by(Qrymaininfo.id.desc()).filter(
+            Qrymaininfo.operdept.like("%{}%".format(deptName))).limit(10).all()
+        return render_template('new.html', tasks=tasks, newNum=fileNumber, dept=deptName)
     # 此处增加科室权限检查
     tasks = dbsession.query(Qrymaininfo).order_by(Qrymaininfo.id.desc()).filter(
-        Qrymaininfo.operdept.like("%{}%".format('经建一科'))).limit(10).all()
+        Qrymaininfo.operdept.like("%{}%".format(deptName))).limit(10).all()
+    # 此处不开放文件上传权限
     return render_template('new.html', tasks=tasks)
+
+
+# 刷新最新文号
+@app.route('/getMaxNum', methods=['POST'])
+def getMaxNum():
+    prefix = request.form["prefix"]
+    num = request.form["num"]
+    deptName = session['deptName']
+    tasks = dbsession.query(Qrymaininfo).order_by(Qrymaininfo.id.desc()).filter(
+        Qrymaininfo.filenumber.like("%{}[[]{}]%".format(prefix, num)), Qrymaininfo.operdept == deptName).first()
+    if tasks:
+        # 对文号按']'进行分割，获取具体号码，并加1返回
+        newNum = int(tasks.filenumber.split(']')[1][:-1]) + 1
+        return jsonify({'msg': prefix, 'num': str(newNum)})
+    return jsonify({'msg': prefix, 'num': 1})
 
 
 @app.route('/logout')
 @login_required
 def logout():
+    if 'userName' in session:
+        session.pop('userName', None)
+    if 'deptName' in session:
+        session.pop('deptName', None)
+    if 'fileHeader' in session:
+        session.pop('fileHeader', None)
+    if 'canUpdate' in session:
+        session.pop('canUpdate', None)
     logout_user()
-    # session.pop('testname', None)
     return '<h1 style="text-align: center;margin-top: 10%;">You are now logged out!</h1>'
 
 
@@ -425,14 +462,12 @@ def before_request_b():
 @app.after_request
 def after_request_a(response):
     print('request_a')
-
     return response
 
 
 @app.after_request
 def after_request_b(response):
     print('I am in after_request_b')
-
     return response
 
 

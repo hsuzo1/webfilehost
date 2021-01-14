@@ -7,20 +7,30 @@
     <!--    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">-->
     <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
 
-    <title>{% block head %}{% endblock %}公文管理系统</title>
+    <title>{%- block head -%}{%- endblock %}公文管理系统</title>
     <link rel="icon" href="{{url_for('static', filename='img/favicon.ico')}}">
     <style>
-        body {
+        html, body {
             min-height: 30rem;
             padding-top: 4rem;
+            height: 100%;
             }
 
         .tf {
             top:56px;
         }
+
+      body {
+        display: flex;
+        align-items: center;
+        padding-top: 40px;
+        padding-bottom: 40px;
+        background-color: #f5f5f5;
+      }
+
     </style>
 </head>
-<body>
+<body class="d-flex flex-column h-100">
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">财政公文管理系统</a>
@@ -71,12 +81,24 @@
     </div>
 </nav>
 
-<main class="container-fluid" >
+<main class="container-fluid">
     {% block body %}{% endblock %}
 </main>
 
 {% block login %}
 {% endblock %}
+<footer class="footer mt-auto py-3">
+    <div class="container">
+        <span class="text-muted" id="fyear" style="font-size:10px"></span>
+    </div>
+</footer>
+
+<!-- 更新年份 -->
+<script>
+	document.getElementById('fyear').innerHTML = new Date().getFullYear() + '&copy;Copyright by ZhangXuzhou';
+</script>
+
+
 
 <script src="{{url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script>
 </body>

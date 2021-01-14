@@ -1,24 +1,26 @@
 {% extends "base.html" %}
 
-{% block head %}
+{% block head -%}
 欢迎登录 -
-{% endblock %}
+{%- endblock %}
 
 {% block login %}
-<div class="row justify-content-center">
-    <div class="text-center" style="position: absolute;top: 50%;transform: translateY(-50%);">
-        <div style="display:inline-block;width:250px;">
-            <h3 class="h3 mb-5" id="tl">公文管理系统</h3>
-            <div class="box">
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <div class="alert alert-danger" role="alert">
-                    {{ messages[0] }}
+<section class="container-fluid">
+    <section class="row  align-items-center mt-5">
+        <section class="col-lg-3 col-sm-10 col-md-5 m-auto">
+            <div class="card text-center shadow-lg p-4 bg-white rounded">
+                <div class="card-title">
+                    <h3 class="h3 m-4" id="tl">公文管理系统</h3>
                 </div>
-                {% endif %}
-                {% endwith %}
-                <form method="POST" action="/login">
+                <form method="POST" action="/login" class="card-body px-5">
                     <div>
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
                         <select class="form-select" id="dept" name="dept" onchange="getuser()" required>
                             <option value=""></option>
                             {% if tasks|length > 1 %}
@@ -35,21 +37,21 @@
                     </div>
                     <div class="">
                         <div class="control">
-                            <input class="form-control" type="password" name="password" placeholder="密码">
+                            <input class="form-control" type="password" name="password" placeholder="请输入密码" required>
                         </div>
                     </div>
                     <div class="checkbox mt-2 mb-4">
-                        <label>
+                        <label class="text-muted">
                             <input type="checkbox" value="remember-me">
                             Remember me
                         </label>
                     </div>
-                    <button class="btn btn-success btn-lg" style="width:200px">Login</button>
+                    <button class="btn btn-success btn-lg " style="width:70%">Login</button>
                 </form>
             </div>
-        </div>
-    </div>
-</div>
+        </section>
+    </section>
+</section>
 <script type="text/javascript">
 <!--更新用户名-->
     function getuser(){
@@ -66,7 +68,10 @@
             },
         });
     }
+
 </script>
+
+
 
 <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
 {% endblock %}
