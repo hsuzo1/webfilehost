@@ -8,8 +8,8 @@
 <section class="container-fluid">
     <section class="row  align-items-center mt-5">
         <section class="col-lg-3 col-sm-10 col-md-5 m-auto">
-            <div class="card text-center shadow-lg p-4 bg-white rounded">
-                <div class="card-title">
+            <div class="card  shadow-lg p-4 bg-white rounded">
+                <div class="card-title text-center">
                     <h3 class="h3 m-4" id="tl">公文管理系统</h3>
                 </div>
                 <form method="POST" action="/login" class="card-body px-5">
@@ -21,23 +21,49 @@
                         </div>
                         {% endif %}
                         {% endwith %}
-                        <select class="form-select" id="dept" name="dept" onchange="getuser()" required>
-                            <option value=""></option>
-                            {% if tasks|length > 1 %}
-                            {% for task in tasks %}
-                            <option value="{{task.id}}">{{ task.deptName }}</option>
-                            {% endfor %}
-                            {% endif %}
-                        </select>
+                        <div class="control relative">
+                            <i class="myfal center-v">
+                                <svg t="1610979134021" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                     xmlns="http://www.w3.org/2000/svg" p-id="9919" width="16" height="16">
+                                    <path d="M672 896c-17.6 0-32-14.4-32-32V192c0-17.6-14.4-32-32-32H416c-17.6 0-32 14.4-32 32v672c0 17.6-14.4 32-32 32s-32-14.4-32-32V192c0-52.8 43.2-96 96-96h192c52.8 0 96 43.2 96 96v672c0 17.6-14.4 32-32 32z m192 32H160c-52.8 0-96-43.2-96-96V576c0-52.8 43.2-96 96-96h64c17.6 0 32 14.4 32 32s-14.4 32-32 32h-64c-17.6 0-32 14.4-32 32v256c0 17.6 14.4 32 32 32h704c17.6 0 32-14.4 32-32V384c0-17.6-14.4-32-32-32h-64c-17.6 0-32-14.4-32-32s14.4-32 32-32h64c52.8 0 96 43.2 96 96v448c0 52.8-43.2 96-96 96z"
+                                          p-id="9920" fill="#707070"></path>
+                                </svg>
+                            </i>
+                            <select class="form-select pl6" id="dept" name="dept" onchange="getuser()" required>
+                                <option value=""></option>
+                                {% if tasks|length > 1 %}
+                                {% for task in tasks %}
+                                <option value="{{task.id}}">{{ task.deptName }}</option>
+                                {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
                     </div>
-                    <div class="control">
-                        <select class="form-select" id="usernames" name="usernames" required>
+                    <div class="control relative">
+                        <i class="myfal center-v">
+                            <svg t="1610979190053" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="10822" width="16" height="16">
+                                <path d="M902.4 818.1c-37-119.1-128.8-216.6-245.5-260.9-6.3-2.4-13.5-1.4-19 2.6-36.7 27-80.3 41.2-125.9 41.2-45.6 0-89.2-14.2-125.9-41.2-5.5-4-12.6-5-19-2.6C250.3 601.5 158.6 699 121.6 818.1c-10.4 33.4-4.4 68.8 16.4 97 20.8 28.2 52.8 44.4 87.8 44.4h572.4c35 0 67-16.2 87.8-44.4 20.8-28.2 26.8-63.5 16.4-97z m-48.7 73.3c-13.1 17.8-33.4 28.1-55.5 28.1H225.8c-22.1 0-42.4-10.2-55.5-28.1-13.1-17.8-16.9-40.2-10.3-61.3C192.3 726 271 640.2 371.6 598.6c41.6 27.8 89.9 42.5 140.4 42.5 50.4 0 98.8-14.7 140.4-42.5C753 640.2 831.7 726 864.1 830c6.5 21.2 2.8 43.5-10.4 61.4z"
+                                      fill="#707070" p-id="10823"></path>
+                                <path d="M512 570.9c139.6 0 253.2-113.6 253.2-253.2C765.2 178 651.6 64.4 512 64.4S258.8 178 258.8 317.6c0 139.7 113.6 253.3 253.2 253.3z m0-466.3c117.5 0 213.1 95.6 213.1 213.1S629.5 530.8 512 530.8s-213.1-95.6-213.1-213.1S394.5 104.6 512 104.6z"
+                                      fill="#707070" p-id="10824"></path>
+                            </svg>
+                        </i>
+                        <select class="form-select pl6" id="usernames" name="usernames" required>
                             <option value=""></option>
                         </select>
                     </div>
                     <div class="">
-                        <div class="control">
-                            <input class="form-control" type="password" name="password" placeholder="请输入密码" required>
+                        <div class="control relative">
+                            <i class="myfal center-v">
+                                <svg t="1610979036803" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                     xmlns="http://www.w3.org/2000/svg" p-id="8184" width="16" height="16">
+                                    <path d="M791.366 459.07l-459.174-0.791c-0.186-61.936-16.847-157.926 36.027-216.192 32.142-35.52 86.326-72.068 144.127-72.068 85.395 0 149.246 64.412 180.166 144.126 9.009 22.992 16.936 35.38 36.037 36.037 47.899 1.45 44.986-49.075 36.029-72.067C719.914 163.03 636.118 97.953 512.346 97.953c-84.12 0-130.475 17.265-180.154 72.065-76.009 83.746-72.259 219.151-72.067 288.26l-26.795 0.791c-25.045 0-45.273 20.034-45.273 44.667v378.249c0 24.774 20.269 44.755 45.273 44.755h557.99c25.009 0 45.273-19.989 45.273-44.755V503.737c0.046-24.678-20.218-44.667-45.227-44.667zM765.68 818.35c0 9.966-3.476 18.514-10.58 25.52-7.045 7.051-15.56 10.58-25.517 10.58H296.362c-9.966 0-18.472-3.478-25.475-10.58-7.051-7.049-10.624-15.553-10.624-25.52V565.635c0-19.878 16.166-36.054 36.098-36.054h433.212c19.932 0 36.107 16.176 36.107 36.054V818.35z"
+                                          fill="#8a8a8a" p-id="8185"></path>
+                                </svg>
+                            </i>
+                            <input class="form-control pl6" type="password" name="password" placeholder="请输入密码"
+                                   required>
                         </div>
                     </div>
                     <div class="checkbox mt-2 mb-4">
@@ -46,32 +72,12 @@
                             Remember me
                         </label>
                     </div>
-                    <button class="btn btn-success btn-lg " style="width:70%">Login</button>
+                    <div class="text-center">
+                        <button class="btn btn-success btn-lg text-center" style="width:70%">Login</button>
+                    </div>
                 </form>
             </div>
         </section>
     </section>
 </section>
-<script type="text/javascript">
-<!--更新用户名-->
-    function getuser(){
-        $('#usernames').text("");
-<!--        $('#usernames').append('<option value=""></option>');-->
-        var dept = $("#dept").val()
-        $.ajax({
-            url:"/getuser/" + dept,
-            type:"post",
-            success:function(data){
-                for (var x in data) {
-                    $('#usernames').append('<option value=' + x + '>' + data[x] +'</option>');
-                    };
-            },
-        });
-    }
-
-</script>
-
-
-
-<script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
 {% endblock %}

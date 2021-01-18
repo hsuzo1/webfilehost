@@ -1,8 +1,6 @@
 <!-- 隐藏的模态窗口按钮 -->
 <button type="button" class="btn" id="spinner" data-bs-toggle="modal"
-        data-bs-target="#staticBackdrop" style="display:none">
-    Launch modal
-</button>
+        data-bs-target="#staticBackdrop" style="display:none"></button>
 
 <!-- 模态窗口显示上传信息 -->
 <div class="modal" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -11,18 +9,19 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="staticBackdropLabel">提醒</h5>
-                <button type="button" class="btn-close" id="btn_Close_Modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" id="btn_Close_Modal" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center mx-5 my-4" id="modal_msg">
                     <br><br>
-                    <strong>文件正在上传中，请勿关闭中断操作...</strong>
-                    <br><br>
-                    <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                    <strong>上传中，请勿中断操作...</strong>
                 </div>
-            </div>
-            <div class="modal-footer">
-
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%"
+                         aria-valuenow="0" aria-valuemin="0"
+                         aria-valuemax="100"></div>
+                </div>
             </div>
         </div>
     </div>

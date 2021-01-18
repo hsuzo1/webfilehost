@@ -22,7 +22,7 @@ from datetime import timedelta
 app = Flask(__name__)
 app.secret_key = "db112546-3fb3-43c3-b625-934603cd28a2"
 app.config['SECRET_KEY'] = "db112546-3fb3-43c3-b625-934603cd28a2"
-app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 最大20MB体积
+app.config['MAX_CONTENT_LENGTH'] = 6 * 1024 * 1024  # 限制上传的文件最大6MiB体积
 
 login_manager = LoginManager()
 login_manager.login_view = 'login'
@@ -49,7 +49,7 @@ dbsession = Session()
 # 上传文件函数
 def upload_file(id, filename, blob, flag):
     check_record = dbsession.query(Filetable).filter(Filetable.id == id).first()
-    # 正文
+    # True=正文 False=附件
     if flag:
         try:
             if check_record:
@@ -83,9 +83,11 @@ def load_user(user_id):
 
 
 @app.route('/')
-@login_required
 def index():
-    return render_template('index.html')
+    if 'userName' in session:
+        return render_template('index.html')
+    else:
+        return redirect('login')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -277,45 +279,31 @@ def upload_page(target, id):
     if filename == '':
         msg = 'No file selected for uploading'
         return redirect(request.url)
+
     if target == 'main':
         # file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         # uploaded_file.save(file_path)
-        try:
-            # 检查是否已经有ID记录，有则更新，无则新增
-            check_record = dbsession.query(Filetable).filter(Filetable.id == id).first()
-            if check_record:
-                check_record.filename = filename
-                check_record.fileblob = uploaded_file.read()
-            else:
-                new_tasks = Filetable(id=id, filename=filename, fileblob=uploaded_file.read())
-                dbsession.add(new_tasks)
-            dbsession.commit()
-            update_Maininfo = dbsession.query(Qrymaininfo).filter(Qrymaininfo.id == id).first()
-            update_Maininfo.mainfile = "有正文"
-            dbsession.commit()
-            msg = '上传文件顺利完成！'
-        except:
-            dbsession.rollback()
-            msg = '新增记录错误'
-            return jsonify({'msg': msg})
+        if upload_file(id, filename, uploaded_file, True):
+            try:
+                update_Maininfo = dbsession.query(Qrymaininfo).filter(Qrymaininfo.id == id).first()
+                update_Maininfo.mainfile = "有正文"
+                dbsession.commit()
+                msg = '上传文件顺利完成！'
+            except:
+                dbsession.rollback()
+                msg = '新增记录错误'
+        return jsonify({'msg': msg})
     else:
-        try:
-            check_record = dbsession.query(Filetable).filter(Filetable.id == id).first()
-            if check_record:
-                check_record.filename1 = filename
-                check_record.fileblob1 = uploaded_file.read()
-            else:
-                new_tasks = Filetable(id=id, filename1=filename, fileblob1=uploaded_file.read())
-                dbsession.add(new_tasks)
-            dbsession.commit()
-            update_maininfo = dbsession.query(Qrymaininfo).filter(Qrymaininfo.id == id).first()
-            update_maininfo.mainfile1 = "有附件"
-            dbsession.commit()
-            msg = '上传文件顺利完成！'
-        except Exception as e:
-            dbsession.rollback()
-            jsonify({'msg': msg})
-    return jsonify({'msg': msg})
+        if upload_file(id, filename, uploaded_file, False):
+            try:
+                update_maininfo = dbsession.query(Qrymaininfo).filter(Qrymaininfo.id == id).first()
+                update_maininfo.mainfile1 = "有附件"
+                dbsession.commit()
+                msg = '上传文件顺利完成！'
+            except:
+                dbsession.rollback()
+                msg = '新增记录错误'
+        return jsonify({'msg': msg})
 
 
 # 导出查询结果为xlsx文件
@@ -434,6 +422,7 @@ def getMaxNum():
     return jsonify({'msg': prefix, 'num': 1})
 
 
+# 注销登录
 @app.route('/logout')
 @login_required
 def logout():
@@ -447,6 +436,16 @@ def logout():
         session.pop('canUpdate', None)
     logout_user()
     return '<h1 style="text-align: center;margin-top: 10%;">You are now logged out!</h1>'
+
+
+# 系统部门、人员等管理维护
+@app.route('/setting', methods=['GET', 'POST'])
+@login_required
+def setting():
+    # S系统级管理员  A科室文管员  N无权限  默认Null
+    if (session['userName'] != '张旭州') and (session['canUpdate'] != 'S'):
+        return redirect('/')
+    return render_template('setting.html')
 
 
 @app.before_request
