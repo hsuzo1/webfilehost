@@ -44,6 +44,11 @@
     top: 50%;
     transform: translateY(-50%);
 }
+
+
+
+
+
     </style>
 </head>
 <body class="d-flex flex-column h-100">
@@ -55,7 +60,8 @@
         <div class="collapse navbar-collapse" id="navbarsExample02">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item active">
-                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" aria-current="page" href="/">Home</a>
+                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" aria-current="page"
+                       href="/">Home</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.path == '/posts' %}active{% endif %}" href="/posts">Posts</a>
@@ -68,13 +74,29 @@
                 </li>
             </ul>
             <ul class="navbar-nav justify-content-end">
+                {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/setting' %}active{% endif %}" href="{{ url_for('setting') }}">系统管理</a>
+                    <a class="nav-link" href="#">Hi, {{ current_user.username }}！</a>
                 </li>
+                {% endif %}
+                {% if current_user.username == '张旭州' or current_user.canUpdate == 'S' %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">系统管理</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">用户管理</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('setUnit') }}">部门管理</a></li>
+                    </ul>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     {% if not current_user.is_authenticated %}
                     <a class="nav-link" href="/signup">Sign Up</a>
                     {% endif %}
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/updatePassword' %} active {% endif %}"
+                       href="/updatePassword">修改密码</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('logout') }}">注销</a>
@@ -94,13 +116,18 @@
 {% endblock %}
 <footer class="footer mt-auto py-3">
     <div class="container">
-        <span class="text-muted" id="fyear" style="font-size:10px"></span>
+        <span class="text-muted" id="fyear" style="font-size:12px"></span>
     </div>
 </footer>
 
 <!-- 更新年份 -->
 <script>
 	document.getElementById('fyear').innerHTML = new Date().getFullYear() + '&copy;Copyright by ZhangXuzhou';
+
+
+
+
+
 </script>
 
 

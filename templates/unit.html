@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{%- block head -%}
+部门科室设置 -
+{%- endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header p-3 text-center">
+                    <h2>科室信息设置</h2>
+                    <div style="text-align:right">
+                        <button class="btn btn-success btn-lg" type="button" data-bs-toggle="modal"
+                                data-bs-target="#staticBackdrop">
+                            <svg t="1611063428338" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="4812" width="32" height="32">
+                                <path d="M590.769231 571.076923h324.923077c15.753846 0 29.538462-13.784615 29.538461-29.538461v-59.076924c0-15.753846-13.784615-29.538462-29.538461-29.538461H590.769231c-11.815385 0-19.692308-7.876923-19.692308-19.692308V108.307692c0-15.753846-13.784615-29.538462-29.538461-29.538461h-59.076924c-15.753846 0-29.538462 13.784615-29.538461 29.538461V433.230769c0 11.815385-7.876923 19.692308-19.692308 19.692308H108.307692c-15.753846 0-29.538462 13.784615-29.538461 29.538461v59.076924c0 15.753846 13.784615 29.538462 29.538461 29.538461H433.230769c11.815385 0 19.692308 7.876923 19.692308 19.692308v324.923077c0 15.753846 13.784615 29.538462 29.538461 29.538461h59.076924c15.753846 0 29.538462-13.784615 29.538461-29.538461V590.769231c0-11.815385 7.876923-19.692308 19.692308-19.692308z"
+                                      p-id="4813" fill="#e6e6e6"></path>
+                            </svg>
+                            新增科室
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body mx-5">
+                    <!--                        消息提示-->
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-dismissible alert-info fade show text-center"
+                         id="pwdMsg" role="alert">
+                        <span>{{ message }}</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="/unit">
+                        <div class="form-group col-1 m-2">
+                            <label>内部ID</label>
+                            <input type="text" class="form-control" id="deptNo" name="deptNo" required readonly>
+                        </div>
+                        <div class="form-group col-5 m-2">
+                            <label>部门名称</label>
+                            <input type="text" class="form-control" id="deptName" name="deptName" required>
+                        </div>
+                        <div class="form-group m-2">
+                            <label>部门使用的发文号</label>
+                            <input type="text" class="form-control" id="fileHeader" name="fileHeader">
+                        </div>
+                        <div class="text-center m-4">
+                            <button class="btn btn-primary" type="submit">确认修改</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div><!--row for unit input-->
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">序号</th>
+                    <th scope="col">内部ID</th>
+                    <th scope="col">部门名称</th>
+                    <th scope="col">部门使用的发文号</th>
+                    <th scope="col">维护</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <th>{{ loop.index }}</th>
+                    <td>{{ task.id }}</td>
+                    <td id="name{{ task.id }}">{{ task.deptName }}</td>
+                    <td id="header{{ task.id }}">{{ task.fileHeader }}</td>
+                    <td><a href="#" id="{{ task.id }}" class="link-success"
+                           style="text-decoration:none" onclick="updateDept(this.id);">
+                        <svg t="1611056765035" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                             xmlns="http://www.w3.org/2000/svg" p-id="1724" width="16" height="16">
+                            <path d="M1023.967266 171.32865A69.645793 69.645793 0 0 0 1003.247643 121.880137l-4.004633-4.004633-1.392916-1.56703-89.668958-90.191302-4.701091-4.701091a70.69048 70.69048 0 0 0-99.941712 0l-2.611717 0.348229-4.004634 4.004633-4.701091 4.701091-5.571663 5.571664-1.392916 1.392916L208.937378 613.753548l-1.56703 1.56703-7.486923 7.486923a48.055597 48.055597 0 0 0-5.397549 8.18338 70.864594 70.864594 0 0 0-49.448513 20.545509l-7.835151 7.835152a71.038709 71.038709 0 0 0-5.745778 92.628904H98.897026a26.117172 26.117172 0 0 0-24.550142 17.411448L1.218801 989.492599a25.943058 25.943058 0 0 0-1.218801 7.835152v1.56703a25.768943 25.768943 0 0 0 1.392916 7.486923v2.089374a25.768943 25.768943 0 0 0 5.223434 7.835151 26.117172 26.117172 0 0 0 18.456135 7.661037 25.768943 25.768943 0 0 0 9.750411-1.392915l218.513675-73.824541a26.117172 26.117172 0 0 0 17.411448-24.550141v-32.559409a69.645793 69.645793 0 0 0 92.803019-5.745777l7.835151-7.835152a70.516365 70.516365 0 0 0 20.545509-49.448513 45.269765 45.269765 0 0 0 8.183381-5.223434l6.268121-6.268122 579.452995-578.408308 1.56703-1.56703 7.486923-7.486923 2.785832-2.785831 3.656404-3.656405 1.218801-1.218801a69.645793 69.645793 0 0 0 21.416081-50.667314z m-61.636526-17.411448a25.768943 25.768943 0 0 1-1.218801 34.822896l-4.178748 4.178748a26.639516 26.639516 0 0 1-36.738156 0L829.655505 104.468689a26.117172 26.117172 0 0 1 0-36.738156l5.04932-5.04932a25.943058 25.943058 0 0 1 35.693469 0z m-665.465549 691.234492l-118.049618-118.049619a24.027798 24.027798 0 0 1 33.952324-33.952324L330.817515 811.19937a24.027798 24.027798 0 1 1-33.952324 33.952324z m-174.114481 92.280675l31.166492-31.166492a26.117172 26.117172 0 1 0-36.91227-36.91227L87.057241 900.520099l32.211179-95.414736h63.900015l36.738155 36.738156v63.900014z m248.635479-158.792407l-125.88477-125.88477 1.044687-1.044687 4.352862-4.352862 522.343445-522.343445A69.645793 69.645793 0 0 0 783.515167 139.291585l100.464056 100.638171a69.645793 69.645793 0 0 0 14.973846 11.143327z"
+                                  p-id="1725" fill="#198754"></path>
+                        </svg>
+                        修改</a>
+                        &nbsp;&nbsp;
+                        <a href="/{{ task.id }}" id="del{{ task.id }}" class="link-danger"
+                           style="text-decoration:none">
+                            <svg t="1611057486763" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="2800" width="16" height="16">
+                                <path d="M694.88 940H329.12c-58 0-105.12-43.04-105.12-96v-448a32 32 0 0 1 64 0v448c0 17.36 18.88 32 41.12 32h365.76c22.32 0 41.12-14.64 41.12-32v-448a32 32 0 0 1 64 0v448c0 52.96-47.2 96-105.12 96zM864 304H160a32 32 0 0 1 0-64h704a32 32 0 0 1 0 64z"
+                                      p-id="2801" fill="#DC3545"></path>
+                                <path d="M432 812a32 32 0 0 1-32-32v-320a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zM592 812a32 32 0 0 1-32-32v-320a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zM384 276a32 32 0 0 1-32-32 160 160 0 0 1 276.16-110 32 32 0 1 1-46.48 44A95.12 95.12 0 0 0 512 148a96 96 0 0 0-96 96 32 32 0 0 1-32 32z"
+                                      p-id="2802" fill="#DC3545"></path>
+                            </svg>
+                            删除</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div><!--row for table-->
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="" id="addNewDept">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">新增科室</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group col-5 m-2">
+                            <label>部门名称</label>
+                            <input type="text" class="form-control" id="newDeptName" name="newDeptName" value="" required>
+                        </div>
+                        <div class="form-group m-2">
+                            <label>部门使用的发文号</label>
+                            <input type="text" class="form-control" id="newFileHeader" name="newFileHeader" value="" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="modalClose">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="addNewUnit();">确认新增</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function updateDept(obj) {
+        var tdName = $('#name' + obj).text();
+        var tdheader = $('#header' + obj).text();
+        $('#deptNo').val(obj);
+        $('#deptName').val(tdName);
+        $('#fileHeader').val(tdheader);
+    }
+
+function addNewUnit(){
+    var name=$('#newDeptName').val();
+    var header=$('#newFileHeader').val();
+    if ((name ==='' ) || (header ==='')) {
+        alert('请输入信息');
+        return false;
+    }
+     $.ajax({
+            type: 'POST',
+            url: '/addNewDept',
+            data: $("#addNewDept").serialize(),
+            datatype: 'json',
+            success: function(data){
+                $('#newDeptName').val('');
+                $('#newFileHeader').val('');
+                $('#modalClose').click();
+                alert(data.msg);
+                location.reload();
+            },
+            error: function(data){
+                alert(data.msg);
+            }
+        });
+}
+
+
+</script>
+
+{% endblock %}

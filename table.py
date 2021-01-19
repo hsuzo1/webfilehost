@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from config import Base
-from sqlalchemy import Column, Integer, String, engine
+from sqlalchemy import Column, Integer, String, engine, VARBINARY
 from sqlalchemy.dialects.mssql import DATETIME, IMAGE
 from sqlalchemy.dialects.mssql.base import MSExecutionContext
 from datetime import datetime
-from flask_login import  UserMixin
-
+from flask_login import UserMixin
 """
-SQL数据库varchar字段全部更新为nvarchar
+配置变动：
+1.SQL数据库varchar字段全部更新为nvarchar
+2.调整主记录的部门归属区分方式
 """
 
 
@@ -64,6 +65,7 @@ class Flaskdemo(Base):
     # 指定 name 映射到 name 字段
     content = Column('content', String(200))
     date_created = Column('date_created', DATETIME, default=datetime.today().strftime("%Y-%m-%d "))
+
     def __repr__(self):
         return '<Task %r>' % self.id
 
@@ -106,12 +108,13 @@ class Qrymaininfo(Base):
     def __repr__(self):
         return '<Task %r>' % self.id
 
+
 # 用户表
 class User(UserMixin, Base):
     __tablename__ = 'Login'
     id = Column('LoginNo', Integer, primary_key=True)
     username = Column('LoginName', String(30))
-    password = Column('Password', String(100))
+    password = Column('Password', VARBINARY(20))
     deptNo = Column('DeptNo', String(5))
     inUse = Column('InUse', String(5))
     # 标记为A的为管理员
@@ -124,7 +127,7 @@ class User(UserMixin, Base):
 class Dept(Base):
     # 指定映射表名
     __tablename__ = 'Dept'
-    id = Column('DeptNo', Integer, primary_key=True, nullable=False)
+    id = Column('DeptNo', Integer, primary_key=True, autoincrement=True, nullable=False)
     deptName = Column('DeptName', String(50))
     deptLev = Column('DeptLev', String(10))
     password = Column('Password', String(20))

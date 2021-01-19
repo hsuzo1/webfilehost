@@ -4,9 +4,10 @@ from io import BytesIO
 from flask import Flask, render_template, url_for, request, redirect, send_file, jsonify, \
     session, make_response, flash
 from sqlalchemy.orm import sessionmaker
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import pandas as pd
 from pandas import ExcelWriter
+from sqlalchemy import or_, cast, VARBINARY
 from werkzeug.utils import secure_filename
 from config import engine
 from table import Flaskdemo, Qrymaininfo, Filetable, User, Dept
@@ -99,10 +100,12 @@ def login():
         userId = request.form.get('usernames')
         password = request.form.get('password')
         remember = True if request.form.get('remember') else False
-        user = dbsession.query(User).filter(User.id == userId).first()
+        user = dbsession.query(User).filter(User.id == userId).filter(
+            or_(User.inUse == None, User.inUse != 'N')).first()
         if not user or not (user.password.decode() == password):
             flash('登录信息错误，请重试。')
             return redirect(url_for('login'))
+        print(type(user.password))
         login_user(user, remember=remember)
         session['userName'] = user.username
         session['deptName'] = dept.deptName
@@ -119,11 +122,12 @@ def login():
     return render_template('login.html', tasks=tasks)
 
 
-# 查找用户名
+# 根据部门名称查找有效用户名
 @app.route('/getuser/<int:dept>', methods=['POST'])
 def getUser(dept):
     if request.method == 'POST':
-        userNames = dbsession.query(User).order_by(User.id).filter(User.deptNo == dept).all()
+        userNames = dbsession.query(User).order_by(User.id).filter(User.deptNo == dept).filter(
+            or_(User.inUse == None, User.inUse != 'N')).all()
         userDict = {}
         for user in userNames:
             userDict[str(user.id)] = user.username
@@ -148,6 +152,7 @@ def posts():
 
 
 @app.route('/delete/<int:id>')
+@login_required
 def delete(id):
     task_to_delete = dbsession.query(Flaskdemo).filter(Flaskdemo.id == id).one()
     try:
@@ -446,6 +451,65 @@ def setting():
     if (session['userName'] != '张旭州') and (session['canUpdate'] != 'S'):
         return redirect('/')
     return render_template('setting.html')
+
+
+# 用户密码修改
+@app.route('/updatePassword', methods=['GET', 'POST'])
+@login_required
+def updatePassword():
+    if request.method == 'POST':
+        newPwd = request.form['password']
+        loginId = int(current_user.id)
+        task = dbsession.query(User).filter(User.id == loginId).first()
+        tmp = cast(newPwd.encode(), VARBINARY(10))
+        task.password = tmp
+        dbsession.commit()
+        return jsonify({'msg': '修改成功'})
+    return render_template('password.html')
+
+
+# 部门科室信息设置
+@app.route('/unit', methods=['GET', 'POST'])
+@login_required
+def setUnit():
+    if request.method == 'POST':
+        if request.form['deptNo'] != '' and request.form['deptName'] != '':
+            id = request.form['deptNo']
+            deptName = request.form['deptName']
+            try:
+                task = dbsession.query(Dept).filter(Dept.id == id).first()
+                task.deptName = deptName
+                task.fileHeader = request.form['fileHeader']
+                dbsession.commit()
+                flash('科室信息修改成功！')
+            except:
+                dbsession.rollback()
+                flash('修改出现错误')
+        else:
+            flash('信息输入有误，请检查！')
+        return redirect(url_for('setUnit'))
+    tasks = dbsession.query(Dept).all()
+    return render_template('unit.html', tasks=tasks)
+
+
+# 新增加科室部门
+@app.route('/addNewDept', methods=['POST'])
+@login_required
+def addNewDept():
+    if request.method == 'POST':
+        id = dbsession.query(Dept.id).order_by(Dept.id.desc()).first().id + 1
+        newName = request.form['newDeptName']
+        newFileHeader = request.form['newFileHeader']
+        try:
+            task = dbsession.query(Dept).first()
+            task.id = id
+            task.deptName = newName
+            task.fileHeader = newFileHeader
+            dbsession.commit()
+            return jsonify({'msg': '新增成功！'})
+        except:
+            dbsession.rollback()
+            return jsonify({'msg': '出现了一点问题！'})
 
 
 @app.before_request

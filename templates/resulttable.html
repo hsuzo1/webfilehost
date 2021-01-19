@@ -42,7 +42,9 @@
         <th class="sticky-top tf" scope="col">正文文档</th>
         <th class="sticky-top tf" scope="col">附件文档</th>
         <th class="sticky-top tf" scope="col">备注</th>
-        <th class="sticky-top tf" scope="col">维护</th>
+        {% if request.path == '/qry' %}
+        <th class="sticky-top tf" scope="col">修改</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
@@ -105,6 +107,7 @@
             {% endif %}
         </td>
         <td>{{task.memo1}}</td>
+        {% if request.path == '/qry' %}
         <td class="text-center">
             {% if (userName == task.creater) or (canUpdate == "A") %}
             <a href="#">
@@ -112,6 +115,7 @@
             </a>
             {% endif %}
         </td>
+        {% endif %}
     </tr>
     {% endfor %}
     {% endif %}
