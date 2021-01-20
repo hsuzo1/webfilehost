@@ -4,10 +4,15 @@ from sqlalchemy.ext.declarative import declarative_base
 import pymssql
 
 
-DBUser = 'flask'
-DBPassword = '123' #yufengcun123*
-DBHost = '192.168.100.5'
+# DBUser = 'flask'  # flask
+# DBPassword = '123' #yufengcun123*
+# DBHost = '192.168.100.5'  # 192.168.100.5
+
+DBUser = 'SbP_yQ0vWKv'  # flask
+DBPassword = 'l#Qk%k5MS8~H19o2e9!@PGuW' #yufengcun123*
+DBHost = '106.52.154.209:58570'  # 192.168.100.5
 DBName = 'filehost2017'
+
 engine = create_engine(f'mssql+pymssql://{DBUser}:{DBPassword}@{DBHost}/{DBName}?charset=utf8')
 # , echo=True
 

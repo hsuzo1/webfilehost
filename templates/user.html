@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{%- block head -%}
+用户信息维护 -
+{%- endblock %}
+
+{% block outlink %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/jquery.dataTables.css')}}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header p-3 text-center">
+                    <h2>用户信息维护</h2>
+                </div>
+                <div class="card-body mx-5">
+                    {% include 'message.html' %}
+                    <form method="POST" action="">
+                        <div style="margin:0px 80px">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group col-2 m-2">
+                                        <label>内部ID</label>
+                                        <input type="text" class="form-control" id="id" name="id" required readonly>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group col-4 m-2">
+                                        <label>用户姓名</label>
+                                        <input type="text" class="form-control" id="username" name="username" required>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group col-4 m-2">
+                                        <label>用户密码</label>
+                                        <input type="text" class="form-control" id="password" name="password" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group col-8 m-2">
+                                        <label>隶属科室或部门</label>
+                                        <input type="text" class="form-control" id="deptName" name="deptName" required>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group col-3 m-2">
+                                        <label>账号状态</label>
+                                        <select class="form-select" id="status" name="status">
+                                            <option value="">启用</option>
+                                            <option value="N">停用</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group col-4 m-2">
+                                        <label>权限</label>
+                                        <select class="form-select" id="userLevel" name="userLevel">
+                                            <option value="">普通用户</option>
+                                            <option value="A">科室文管员</option>
+                                            <option value="S">系统管理员</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group  m-2">
+                                        <label>能查看的科室</label>
+                                        <input type="text" class="form-control" id="userRange" name="userRange" readonly >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group border m-2 p-2">
+                                        <p>从下面勾选相关科室：</p>
+                                        <ul class="list-group list-group-horizontal">
+                                            {% for unit in unit_list %}
+                                            {% if loop.index < 10 %}
+                                            <li class="list-group-item">
+                                                <input class="form-check-input me-1" type="checkbox" id="chk{{unit.id}}"
+                                                       value="{{unit.deptName}}" onclick="updateUnit(this.id);">
+                                                {{unit.deptName}}
+                                            </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                        <ul class="list-group list-group-horizontal">
+                                            {% for unit in unit_list %}
+                                            {% if (loop.index > 9) and (loop.index <20) %}
+                                            <li class="list-group-item">
+                                                <input class="form-check-input me-1" type="checkbox" id="chk1{{unit.id}}"
+                                                       value="{{unit.deptName}}" onclick="updateUnit(this.id);">
+                                                {{unit.deptName}}
+                                            </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                        <ul class="list-group list-group-horizontal">
+                                            {% for unit in unit_list %}
+                                            {% if (loop.index > 19) and (loop.index <30) %}
+                                            <li class="list-group-item">
+                                                <input class="form-check-input me-1" type="checkbox" id="chk2{{unit.id}}"
+                                                       value="{{unit.deptName}}" onclick="updateUnit(this.id);">
+                                                {{unit.deptName}}
+                                            </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                        <ul class="list-group list-group-horizontal">
+                                            {% for unit in unit_list %}
+                                            {% if (loop.index > 29) and (loop.index <40) %}
+                                            <li class="list-group-item">
+                                                <input class="form-check-input me-1" type="checkbox" id="chk3{{unit.id}}"
+                                                       value="{{unit.deptName}}" onclick="updateUnit(this.id);">
+                                                {{unit.deptName}}
+                                            </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="text-center m-4">
+                                    <button class="btn btn-primary" type="submit" id="btn_update" disabled>确认修改
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col">
+
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div><!--row for unit input-->
+    <div class="row">
+        <div class="col-12">
+            <table class="display nowrap dataTable dtr-inline collapsed" id="myTable">
+                <thead>
+                <tr>
+                    <th scope="col">序号</th>
+                    <th scope="col">内部ID</th>
+                    <th scope="col">用户名称</th>
+                    <th scope="col">登录密码</th>
+                    <th scope="col">隶属部门</th>
+                    <th scope="col">账号状态</th>
+                    <th scope="col">权限</th>
+                    <th scope="col">能查看的科室</th>
+                    <th scope="col">管理员操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <th>{{ loop.index }}</th>
+                    <td>{{ task.id }}</td>
+                    <td id="username{{ task.id }}">{{ task.username }}</td>
+                    <td id="password{{ task.id }}">{{ passwords[loop.index - 1] }}</td>
+                    <td id="deptName{{ task.id }}">{{ task.deptNo }}</td>
+                    <td id="status{{ task.id }}">{% if task.inUse|trim == 'N' %}停用{% endif %}</td>
+                    <td id="userLevel{{ task.id }}">{% if task.canUpdate|trim == 'S' %}系统管理员{% elif task.canUpdate
+                        |trim == 'A' %}科室文管员{% else %}普通用户{% endif %}
+                    </td>
+                    <td id="userRange{{ task.id }}">{{ task.bmqx or ''}}</td>
+                    <td><a href="#" id="{{ task.id }}" class="link-success"
+                           style="text-decoration:none" onclick="update(this.id);">
+                        <svg t="1611056765035" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                             xmlns="http://www.w3.org/2000/svg" p-id="1724" width="16" height="16">
+                            <path d="M1023.967266 171.32865A69.645793 69.645793 0 0 0 1003.247643 121.880137l-4.004633-4.004633-1.392916-1.56703-89.668958-90.191302-4.701091-4.701091a70.69048 70.69048 0 0 0-99.941712 0l-2.611717 0.348229-4.004634 4.004633-4.701091 4.701091-5.571663 5.571664-1.392916 1.392916L208.937378 613.753548l-1.56703 1.56703-7.486923 7.486923a48.055597 48.055597 0 0 0-5.397549 8.18338 70.864594 70.864594 0 0 0-49.448513 20.545509l-7.835151 7.835152a71.038709 71.038709 0 0 0-5.745778 92.628904H98.897026a26.117172 26.117172 0 0 0-24.550142 17.411448L1.218801 989.492599a25.943058 25.943058 0 0 0-1.218801 7.835152v1.56703a25.768943 25.768943 0 0 0 1.392916 7.486923v2.089374a25.768943 25.768943 0 0 0 5.223434 7.835151 26.117172 26.117172 0 0 0 18.456135 7.661037 25.768943 25.768943 0 0 0 9.750411-1.392915l218.513675-73.824541a26.117172 26.117172 0 0 0 17.411448-24.550141v-32.559409a69.645793 69.645793 0 0 0 92.803019-5.745777l7.835151-7.835152a70.516365 70.516365 0 0 0 20.545509-49.448513 45.269765 45.269765 0 0 0 8.183381-5.223434l6.268121-6.268122 579.452995-578.408308 1.56703-1.56703 7.486923-7.486923 2.785832-2.785831 3.656404-3.656405 1.218801-1.218801a69.645793 69.645793 0 0 0 21.416081-50.667314z m-61.636526-17.411448a25.768943 25.768943 0 0 1-1.218801 34.822896l-4.178748 4.178748a26.639516 26.639516 0 0 1-36.738156 0L829.655505 104.468689a26.117172 26.117172 0 0 1 0-36.738156l5.04932-5.04932a25.943058 25.943058 0 0 1 35.693469 0z m-665.465549 691.234492l-118.049618-118.049619a24.027798 24.027798 0 0 1 33.952324-33.952324L330.817515 811.19937a24.027798 24.027798 0 1 1-33.952324 33.952324z m-174.114481 92.280675l31.166492-31.166492a26.117172 26.117172 0 1 0-36.91227-36.91227L87.057241 900.520099l32.211179-95.414736h63.900015l36.738155 36.738156v63.900014z m248.635479-158.792407l-125.88477-125.88477 1.044687-1.044687 4.352862-4.352862 522.343445-522.343445A69.645793 69.645793 0 0 0 783.515167 139.291585l100.464056 100.638171a69.645793 69.645793 0 0 0 14.973846 11.143327z"
+                                  p-id="1725" fill="#198754"></path>
+                        </svg>
+                        修改</a>
+                        <a href="/{{ task.id }}" id="del{{ task.id }}" class="link-danger"
+                           style="text-decoration:none">
+                            <svg t="1611057486763" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="2800" width="16" height="16">
+                                <path d="M694.88 940H329.12c-58 0-105.12-43.04-105.12-96v-448a32 32 0 0 1 64 0v448c0 17.36 18.88 32 41.12 32h365.76c22.32 0 41.12-14.64 41.12-32v-448a32 32 0 0 1 64 0v448c0 52.96-47.2 96-105.12 96zM864 304H160a32 32 0 0 1 0-64h704a32 32 0 0 1 0 64z"
+                                      p-id="2801" fill="#DC3545"></path>
+                                <path d="M432 812a32 32 0 0 1-32-32v-320a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zM592 812a32 32 0 0 1-32-32v-320a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zM384 276a32 32 0 0 1-32-32 160 160 0 0 1 276.16-110 32 32 0 1 1-46.48 44A95.12 95.12 0 0 0 512 148a96 96 0 0 0-96 96 32 32 0 0 1-32 32z"
+                                      p-id="2802" fill="#DC3545"></path>
+                            </svg>
+                            删除</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div><!--row for table-->
+</div>
+
+
+<script>
+    function update(id) {
+        var username = $('#username' + id).text();
+        var password = $('#password' + id).text();
+        var deptName = $('#deptName' + id).text().trim();
+        var status = $('#status' + id).text().trim();
+        var userLevel = $('#userLevel' + id).text().trim();
+        var userRange = $('#userRange' + id).text().trim();
+
+        $('#id').val(id);
+        $('#username').val(username);
+        $('#password').val(password);
+        $('#deptName').val(deptName);
+        if (status==''){
+            $('#status').val('');;
+        } else {
+            $('#status').val('N');
+        }
+        if (userLevel=='系统管理员'){
+            $('#userLevel').val('S');
+        } else if (userLevel=='科室文管员') {
+            $('#userLevel').val('A');
+        } else {
+            $('#userLevel').val('');
+        }
+        $('#userRange').val(userRange);
+        $('#btn_update').removeAttr("disabled");;
+
+
+    }
+
+function addNewUnit(){
+    var name=$('#newDeptName').val();
+    var header=$('#newFileHeader').val();
+    if ((name ==='' ) || (header ==='')) {
+        alert('请输入信息');
+        return false;
+    }
+     $.ajax({
+            type: 'POST',
+            url: '/addNewDept',
+            data: $("#addNewDept").serialize(),
+            datatype: 'json',
+            success: function(data){
+                $('#newDeptName').val('');
+                $('#newFileHeader').val('');
+                $('#modalClose').click();
+                alert(data.msg);
+                location.reload();
+            },
+            error: function(data){
+                alert(data.msg);
+            }
+        });
+}
+
+
+function updateUnit(id){
+    var bool = document.getElementById(id).checked;
+    var chktext = $("#"+ id).val()
+    var current_val = $('#userRange').val();
+    if (bool){
+        $('#userRange').val( current_val + ',' + chktext);
+    } else {
+        newtxt = current_val.replace(',' + chktext, '');
+        $('#userRange').val( newtxt );
+    }
+}
+
+
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+<!--消息提示模块-->
+<!--
+使用方式：
+flash({"type":"alert-warning", "msg":"修改出现错误！"})
+type:
+alert-primary
+alert-secondary
+alert-success
+alert-danger
+alert-warning
+alert-info
+alert-light
+alert-dark
+-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-dismissible {{message.type}} fade show text-center"
+     id="pwdMsg" role="alert">
+    <span>{{ message.msg }}</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}

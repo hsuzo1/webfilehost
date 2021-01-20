@@ -116,7 +116,7 @@ class User(UserMixin, Base):
     username = Column('LoginName', String(30))
     password = Column('Password', VARBINARY(20))
     deptNo = Column('DeptNo', String(5))
-    inUse = Column('InUse', String(5))
+    inUse = Column('InUse', String(5))  # N=停用
     # 标记为A的为管理员
     canUpdate = Column('IsValid', String(5))
     bmqx = Column('BMQX', String(500))

@@ -8,6 +8,8 @@
     <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
     <title>{%- block head -%}{%- endblock %}公文管理系统</title>
     <link rel="icon" href="{{url_for('static', filename='img/favicon.ico')}}">
+    {% block outlink %}
+    {% endblock %}
     <style>
         html, body {
             min-height: 30rem;
@@ -44,11 +46,6 @@
     top: 50%;
     transform: translateY(-50%);
 }
-
-
-
-
-
     </style>
 </head>
 <body class="d-flex flex-column h-100">
@@ -84,7 +81,7 @@
                     <a class="nav-link dropdown-toggle"
                        href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">系统管理</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">用户管理</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user_manage') }}">用户管理</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('setUnit') }}">部门管理</a></li>
                     </ul>
                 </li>
@@ -123,16 +120,20 @@
 <!-- 更新年份 -->
 <script>
 	document.getElementById('fyear').innerHTML = new Date().getFullYear() + '&copy;Copyright by ZhangXuzhou';
-
-
-
-
-
 </script>
 
 
 <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+{% if request.path =='/user-manage' %}
+<script type="text/javascript" charset="utf8" src="{{url_for('static', filename='js/jquery.dataTables.js')}}"></script>
+<script>
+    $(document).ready( function () {
+    $('#myTable').DataTable();
+} );
+</script>
+{% endif %}
 <script src="{{url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/my.js')}}"></script>
+
 </body>
 </html>

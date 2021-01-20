@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import pandas as pd
 from pandas import ExcelWriter
-from sqlalchemy import or_, cast, VARBINARY
+from sqlalchemy import or_, cast, VARBINARY, text
 from werkzeug.utils import secure_filename
 from config import engine
 from table import Flaskdemo, Qrymaininfo, Filetable, User, Dept
@@ -481,12 +481,12 @@ def setUnit():
                 task.deptName = deptName
                 task.fileHeader = request.form['fileHeader']
                 dbsession.commit()
-                flash('科室信息修改成功！')
+                flash({"type": "alert-success", "msg": "科室信息修改成功！"})
             except:
                 dbsession.rollback()
-                flash('修改出现错误')
+                flash({"type": "alert-warning", "msg": "修改出现错误！"})
         else:
-            flash('信息输入有误，请检查！')
+            flash({"type": "alert-danger", "msg": "信息输入有误，请检查！！"})
         return redirect(url_for('setUnit'))
     tasks = dbsession.query(Dept).all()
     return render_template('unit.html', tasks=tasks)
@@ -501,15 +501,30 @@ def addNewDept():
         newName = request.form['newDeptName']
         newFileHeader = request.form['newFileHeader']
         try:
-            task = dbsession.query(Dept).first()
-            task.id = id
-            task.deptName = newName
-            task.fileHeader = newFileHeader
+            task = Dept(id=id, deptName=newName, fileHeader=newFileHeader)
+            dbsession.add(task)
             dbsession.commit()
             return jsonify({'msg': '新增成功！'})
         except:
             dbsession.rollback()
             return jsonify({'msg': '出现了一点问题！'})
+
+
+# 用户维护模块
+@app.route('/user-manage')
+def user_manage():
+    tasks = dbsession.query(User).from_statement(text(
+        "SELECT [Login].[LoginNo] AS [Login_LoginNo], [Login].[LoginName] AS [Login_LoginName],"
+        " [Login].[Password] AS [Login_Password], (SELECT [Dept].[DeptName] FROM [Dept] WHERE "
+        "[Dept].[DeptNo]=[Login].[DeptNo]) AS [Login_DeptNo], [Login].[InUse] AS [Login_InUse], "
+        "[Login].[IsValid] AS [Login_IsValid], [Login].[BMQX] AS [Login_BMQX] FROM [Login]")).all()
+    passwords = []
+    # 对密码进行转码
+    for task in tasks:
+        passwords.append(task.password.decode())
+    # 获取部门名称列表
+    unit_list = dbsession.query(Dept.id, Dept.deptName).all()
+    return render_template('user.html', tasks=tasks, passwords=passwords, unit_list=unit_list)
 
 
 @app.before_request

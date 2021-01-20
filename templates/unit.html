@@ -24,19 +24,7 @@
                     </div>
                 </div>
                 <div class="card-body mx-5">
-                    <!--                        消息提示-->
-                    {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-dismissible alert-info fade show text-center"
-                         id="pwdMsg" role="alert">
-                        <span>{{ message }}</span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% endwith %}
-
+                    {% include 'message.html' %}
                     <form method="POST" action="/unit">
                         <div class="form-group col-1 m-2">
                             <label>内部ID</label>
