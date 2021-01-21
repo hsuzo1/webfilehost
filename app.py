@@ -60,7 +60,7 @@ def upload_file(id, filename, blob, flag):
                 new_tasks = Filetable(id=id, filename=filename, fileblob=blob.read())
                 dbsession.add(new_tasks)
             dbsession.commit()
-        except:
+        except Exception:
             dbsession.rollback()
             return False
     else:
@@ -105,7 +105,6 @@ def login():
         if not user or not (user.password.decode() == password):
             flash('登录信息错误，请重试。')
             return redirect(url_for('login'))
-        print(type(user.password))
         login_user(user, remember=remember)
         session['userName'] = user.username
         session['deptName'] = dept.deptName
@@ -145,6 +144,7 @@ def posts():
             dbsession.commit()
             return redirect('/posts')
         except:
+            dbsession.rollback()
             return 'There was an issue adding your task'
     else:
         tasks = dbsession.query(Flaskdemo).all()
@@ -160,6 +160,7 @@ def delete(id):
         dbsession.commit()
         return redirect('/posts')
     except:
+        dbsession.rollback()
         return 'There was a problem deleting that task'
 
 
@@ -172,6 +173,7 @@ def update(id):
             dbsession.commit()
             return redirect('/posts')
         except:
+            dbsession.rollback()
             return 'There was an issue updating your task'
     else:
         return render_template('update.html', task=task)
@@ -277,12 +279,10 @@ def upload_page(target, id):
     if request.method == 'POST':
         # check if the post request has the file part
         if input_name not in request.files:
-            msg = '没有发现上传的文件内容'
             return redirect(request.url)
     uploaded_file = request.files[input_name]
     filename = secure_filename(uploaded_file.filename)
     if filename == '':
-        msg = 'No file selected for uploading'
         return redirect(request.url)
 
     if target == 'main':
@@ -305,7 +305,7 @@ def upload_page(target, id):
                 update_maininfo.mainfile1 = "有附件"
                 dbsession.commit()
                 msg = '上传文件顺利完成！'
-            except:
+            except Exception:
                 dbsession.rollback()
                 msg = '新增记录错误'
         return jsonify({'msg': msg})
@@ -511,7 +511,8 @@ def addNewDept():
 
 
 # 用户维护模块
-@app.route('/user-manage')
+@app.route('/user-manage', methods=['GET', 'POST'])
+@login_required
 def user_manage():
     tasks = dbsession.query(User).from_statement(text(
         "SELECT [Login].[LoginNo] AS [Login_LoginNo], [Login].[LoginName] AS [Login_LoginName],"
@@ -525,6 +526,63 @@ def user_manage():
     # 获取部门名称列表
     unit_list = dbsession.query(Dept.id, Dept.deptName).all()
     return render_template('user.html', tasks=tasks, passwords=passwords, unit_list=unit_list)
+
+
+# 新增用户
+@app.route('/addNewUser/<string:tag>', methods=['POST'])
+@login_required
+def addNewUser(tag):
+    username = request.form['username']
+    password = request.form['password']
+    converted_password = cast(password.encode(), VARBINARY(10))
+    deptName = request.form['deptName']
+    deptNo = dbsession.query(Dept.id).filter(Dept.deptName == deptName).first()
+    inUse = request.form['status']
+    canUpdate = request.form['userLevel']
+    userRange = request.form['userRange']
+    if tag == 'add':
+        new_id = dbsession.query(User.id).order_by(User.id.desc()).first().id + 1
+        add_new = User(id=new_id, username=username, password=converted_password, deptNo=deptNo.id, inUse=inUse, canUpdate=canUpdate,
+                   bmqx=userRange)
+        dbsession.add(add_new)
+        msg = '新增用户【' + username + '】'
+    elif tag == 'modify':
+        id = request.form['user_id']
+        task = dbsession.query(User).filter(User.id==id).first()
+        task.username = username
+        task.password = converted_password
+        task.deptNo = deptNo.id
+        task.inUse = inUse
+        task.canUpdate = canUpdate
+        task.bmqx = userRange
+        msg = '修改用户' + username
+    try:
+        dbsession.commit()
+        flash({"type": "alert-success", "msg": msg + '成功！'})
+    except Exception as error:
+        dbsession.rollback()
+        msg = '出错了'
+        flash({"type": "alert-danger", "msg": msg})
+    if tag == 'add':
+        return jsonify({'msg': msg})
+    else:
+        return redirect(url_for('user_manage'))
+
+
+# 删除用户
+@app.route('/remove/<int:id>', methods=['POST', 'GET'])
+@login_required
+def remove_user(id):
+    if id:
+        task_to_delete = dbsession.query(User).filter(User.id == id).one()
+        try:
+            dbsession.delete(task_to_delete)
+            dbsession.commit()
+            flash({"type": "alert-success", "msg": '用户删除成功！'})
+        except:
+            dbsession.rollback()
+            flash({"type": "alert-danger", "msg": '删除出错'})
+    return redirect(url_for('user_manage'))
 
 
 @app.before_request

@@ -17,3 +17,31 @@
             },
         });
     }
+
+
+$(document).ready(function(){
+    $("#btn_add").click(function(event){
+        event.preventDefault();
+        var username=$('#username').val();
+       if (username ==='' ) {
+           alert('请输入信息');
+           return false;
+       }
+        alert('pass');
+        $.ajax({
+            type: 'POST',
+            url: '/addNewUser',
+            data: $("#addNewUser").serialize(),
+            datatype: 'json',
+            success: function(data){
+                $('input').val('');
+                console.log(data.msg);
+                location.reload();
+            },
+            error: function(data){
+                console.log(data.msg);
+            }
+        });
+    });
+
+});

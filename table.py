@@ -112,7 +112,7 @@ class Qrymaininfo(Base):
 # 用户表
 class User(UserMixin, Base):
     __tablename__ = 'Login'
-    id = Column('LoginNo', Integer, primary_key=True)
+    id = Column('LoginNo', Integer, autoincrement=True, primary_key=True)
     username = Column('LoginName', String(30))
     password = Column('Password', VARBINARY(20))
     deptNo = Column('DeptNo', String(5))

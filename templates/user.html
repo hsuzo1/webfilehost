@@ -18,13 +18,13 @@
                 </div>
                 <div class="card-body mx-5">
                     {% include 'message.html' %}
-                    <form method="POST" action="">
+                    <form method="POST" action="/addNewUser/modify" id="addNewUser">
                         <div style="margin:0px 80px">
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group col-2 m-2">
                                         <label>内部ID</label>
-                                        <input type="text" class="form-control" id="id" name="id" required readonly>
+                                        <input type="text" class="form-control" id="user_id" name="user_id" readonly>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -34,13 +34,15 @@
                                 <div class="col">
                                     <div class="form-group col-4 m-2">
                                         <label>用户姓名</label>
-                                        <input type="text" class="form-control" id="username" name="username" required>
+                                        <input type="text" class="form-control" id="username" name="username"
+                                               minlength="2" maxlength="8" required>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group col-4 m-2">
                                         <label>用户密码</label>
-                                        <input type="text" class="form-control" id="password" name="password" required>
+                                        <input type="text" class="form-control" id="password" name="password"
+                                               pattern="[0-9a-zA-Z]{1,10}" maxlength="8" minlength="1" required>
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +50,15 @@
                                 <div class="col">
                                     <div class="form-group col-8 m-2">
                                         <label>隶属科室或部门</label>
-                                        <input type="text" class="form-control" id="deptName" name="deptName" required>
+                                        <select class="form-select" id="deptName" name="deptName" required>
+                                            <option value=""></option>
+                                            {% if unit_list|length > 1 %}
+                                            {% for unit in unit_list %}
+                                            <option value="{{unit.deptName}}" opId="{{unit.id}}">{{unit.deptName}}
+                                            </option>
+                                            {% endfor %}
+                                            {% endif %}
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -75,32 +85,34 @@
                                 <div class="col">
                                     <div class="form-group  m-2">
                                         <label>能查看的科室</label>
-                                        <input type="text" class="form-control" id="userRange" name="userRange" readonly >
+                                        <input type="text" class="form-control" id="userRange" name="userRange"
+                                               readonly>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <div class="form-group border m-2 p-2">
-                                        <p>从下面勾选相关科室：</p>
-                                        <ul class="list-group list-group-horizontal">
+                                    <div class="form-group border border-secondary rounded m-2 mt-4 p-2">
+                                        <p class="text-center">要设置人员能查看的科室，请从下面列表中选择相关科室：</p>
+                                        <ul class="list-group list-group-horizontal ">
                                             {% for unit in unit_list %}
                                             {% if loop.index < 10 %}
-                                            <li class="list-group-item">
+                                            <li class="list-group-item border-0">
                                                 <input class="form-check-input me-1" type="checkbox" id="chk{{unit.id}}"
                                                        value="{{unit.deptName}}" onclick="updateUnit(this.id);">
-                                                {{unit.deptName}}
+                                                <label for="chk{{unit.id}}">{{unit.deptName}}</label>
                                             </li>
                                             {% endif %}
                                             {% endfor %}
                                         </ul>
-                                        <ul class="list-group list-group-horizontal">
+                                        <ul class="list-group list-group-horizontal ">
                                             {% for unit in unit_list %}
                                             {% if (loop.index > 9) and (loop.index <20) %}
-                                            <li class="list-group-item">
-                                                <input class="form-check-input me-1" type="checkbox" id="chk1{{unit.id}}"
+                                            <li class="list-group-item border-0">
+                                                <input class="form-check-input me-1" type="checkbox"
+                                                       id="chk1{{unit.id}}"
                                                        value="{{unit.deptName}}" onclick="updateUnit(this.id);">
-                                                {{unit.deptName}}
+                                                <label for="chk1{{unit.id}}">{{unit.deptName}}</label>
                                             </li>
                                             {% endif %}
                                             {% endfor %}
@@ -108,10 +120,11 @@
                                         <ul class="list-group list-group-horizontal">
                                             {% for unit in unit_list %}
                                             {% if (loop.index > 19) and (loop.index <30) %}
-                                            <li class="list-group-item">
-                                                <input class="form-check-input me-1" type="checkbox" id="chk2{{unit.id}}"
+                                            <li class="list-group-item border-0">
+                                                <input class="form-check-input me-1" type="checkbox"
+                                                       id="chk2{{unit.id}}"
                                                        value="{{unit.deptName}}" onclick="updateUnit(this.id);">
-                                                {{unit.deptName}}
+                                                <label for="chk2{{unit.id}}">{{unit.deptName}}</label>
                                             </li>
                                             {% endif %}
                                             {% endfor %}
@@ -119,14 +132,21 @@
                                         <ul class="list-group list-group-horizontal">
                                             {% for unit in unit_list %}
                                             {% if (loop.index > 29) and (loop.index <40) %}
-                                            <li class="list-group-item">
-                                                <input class="form-check-input me-1" type="checkbox" id="chk3{{unit.id}}"
+                                            <li class="list-group-item border-0">
+                                                <input class="form-check-input me-1" type="checkbox"
+                                                       id="chk3{{unit.id}}"
                                                        value="{{unit.deptName}}" onclick="updateUnit(this.id);">
-                                                {{unit.deptName}}
+                                                <label for="chk3{{unit.id}}">{{unit.deptName}}</label>
                                             </li>
                                             {% endif %}
                                             {% endfor %}
                                         </ul>
+                                        <div class="col text-center">
+                                            <a href="javascript:void(0)" id="sel" onclick="setNo(this)">全选</a>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center">
+
                                     </div>
                                 </div>
                             </div>
@@ -135,12 +155,20 @@
                         <div class="row">
                             <div class="col">
                                 <div class="text-center m-4">
+                                    <button class="btn btn-primary" id="btn_add">新增用户</button>
+
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="text-center m-4">
                                     <button class="btn btn-primary" type="submit" id="btn_update" disabled>确认修改
                                     </button>
                                 </div>
                             </div>
                             <div class="col">
-
+                                <div class="text-center m-4">
+                                    <button class="btn btn-primary" id="cancel_submit">取消操作</button>
+                                </div>
                             </div>
                         </div>
 
@@ -151,12 +179,11 @@
         </div>
     </div><!--row for unit input-->
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 text-center">
             <table class="display nowrap dataTable dtr-inline collapsed" id="myTable">
                 <thead>
                 <tr>
                     <th scope="col">序号</th>
-                    <th scope="col">内部ID</th>
                     <th scope="col">用户名称</th>
                     <th scope="col">登录密码</th>
                     <th scope="col">隶属部门</th>
@@ -170,7 +197,6 @@
                 {% for task in tasks %}
                 <tr>
                     <th>{{ loop.index }}</th>
-                    <td>{{ task.id }}</td>
                     <td id="username{{ task.id }}">{{ task.username }}</td>
                     <td id="password{{ task.id }}">{{ passwords[loop.index - 1] }}</td>
                     <td id="deptName{{ task.id }}">{{ task.deptNo }}</td>
@@ -187,7 +213,8 @@
                                   p-id="1725" fill="#198754"></path>
                         </svg>
                         修改</a>
-                        <a href="/{{ task.id }}" id="del{{ task.id }}" class="link-danger"
+                        <a href="/remove/{{ task.id }}" id="del{{ task.id }}" class="link-danger"
+                           onclick="return removeUser();"
                            style="text-decoration:none">
                             <svg t="1611057486763" class="icon" viewBox="0 0 1024 1024" version="1.1"
                                  xmlns="http://www.w3.org/2000/svg" p-id="2800" width="16" height="16">
@@ -208,18 +235,54 @@
 
 
 <script>
+
+//新增用户
+window.onload=function(){
+    $("#btn_add").click(function(event){
+       event.preventDefault();
+       var username=$('#username').val();
+       if (username ==='' ) {
+           alert('请输入信息');
+           return false;
+       }
+        $.ajax({
+            type: 'POST',
+            url: '/addNewUser/add',
+            data: $("#addNewUser").serialize(),
+            datatype: 'json',
+            success: function(data){
+                $('input').val('');
+                console.log(data.msg);
+                location.reload();
+            },
+            error: function(data){
+                console.log(data.msg);
+            }
+        });
+    });
+
+    $("#cancel_submit").click(function(event){
+        event.preventDefault();
+        location.reload();
+    });
+};
+    //修改-用户信息
     function update(id) {
+        $("#btn_add").attr('disabled', true);
         var username = $('#username' + id).text();
         var password = $('#password' + id).text();
         var deptName = $('#deptName' + id).text().trim();
         var status = $('#status' + id).text().trim();
         var userLevel = $('#userLevel' + id).text().trim();
         var userRange = $('#userRange' + id).text().trim();
-
-        $('#id').val(id);
+        $('#user_id').val(id);
         $('#username').val(username);
         $('#password').val(password);
-        $('#deptName').val(deptName);
+        if (deptName==''){
+            $('#deptName').val('');;
+        } else {
+            $('#deptName').val(deptName);
+        }
         if (status==''){
             $('#status').val('');;
         } else {
@@ -233,48 +296,72 @@
             $('#userLevel').val('');
         }
         $('#userRange').val(userRange);
+        //选中已有权限科室名称
+        $('input:checkbox').prop("checked",false);
+        var arr=userRange.split(",");
+        if (arr.length > 1){
+            for(var i=0;i<arr.length;i++){
+                $('input[value='+ arr[i]+']').prop("checked",true);
+            }
+        }
         $('#btn_update').removeAttr("disabled");;
+    };
 
-
-    }
-
-function addNewUnit(){
-    var name=$('#newDeptName').val();
-    var header=$('#newFileHeader').val();
-    if ((name ==='' ) || (header ==='')) {
-        alert('请输入信息');
+// 删除用户
+function removeUser(){
+    var r=confirm("您确定要删除该用户吗？")
+    if (r==true) {
+        return true;
+    } else {
         return false;
     }
-     $.ajax({
-            type: 'POST',
-            url: '/addNewDept',
-            data: $("#addNewDept").serialize(),
-            datatype: 'json',
-            success: function(data){
-                $('#newDeptName').val('');
-                $('#newFileHeader').val('');
-                $('#modalClose').click();
-                alert(data.msg);
-                location.reload();
-            },
-            error: function(data){
-                alert(data.msg);
-            }
-        });
 }
 
 
+//click更新能查看的部门名称
 function updateUnit(id){
-    var bool = document.getElementById(id).checked;
+    var bool = $("#"+id).prop("checked");
     var chktext = $("#"+ id).val()
     var current_val = $('#userRange').val();
     if (bool){
-        $('#userRange').val( current_val + ',' + chktext);
+        if (current_val===''){
+            $('#userRange').val(chktext);
+        } else {
+            $('#userRange').val(current_val + ',' +chktext);
+        }
     } else {
-        newtxt = current_val.replace(',' + chktext, '');
+        var idx = current_val.indexOf(chktext);
+        if (idx==0){
+            newtxt = current_val.replace( chktext+',', '');
+        } else {
+            newtxt = current_val.replace( ','+chktext, '');
+        }
         $('#userRange').val( newtxt );
+        if ($('#userRange').val() === chktext){
+            $('#userRange').val('');
+        }
     }
 }
+
+   //全选和全不选函数
+   function setNo(obj) {
+       if ($(obj).text()==='全不选') {
+            $(obj).text('全选');
+            $('input:checkbox').prop('checked', false);
+            $('#userRange').val('');
+       } else {
+            $(obj).text('全不选');
+            $('input:checkbox').prop('checked', true);
+            var textArray = '';
+            $("input[type='checkbox']").each(function() {
+                textArray = textArray +','+ $(this).val();
+            });
+            $('#userRange').val(textArray.substring(1));
+       };
+   }
+
+
+
 
 
 
