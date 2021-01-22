@@ -1,0 +1,162 @@
+<!--发文拟稿的基本要素-->
+<table class="table table-sm table-borderless mt-3">
+    <tbody>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputTitle" class="col-form-label">文件标题</label>
+            </div>
+        </td>
+        <td>
+            <div class="col-9">
+                <input type="text" class="form-control" id="inputTitle" name="inputTitle" required autofocus>
+            </div>
+        </td>
+        <td>
+            <div class="col-12">
+                <label for="inputCreater" class="col-12 col-form-label">拟稿人</label>
+            </div>
+        </td>
+        <td>
+            <div class="row col-10">
+                <input type="text" class="form-control" id="inputCreater" name="inputCreater">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputHeader" class="col-12 col-form-label">发文文号</label>
+            </div>
+        </td>
+        <td>
+            <div class="row">
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="inputHeader" name="inputHeader" required>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control" id="inputYear" name="inputYear" min="2000"
+                           max="2064" required>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control" id="inputNum" name="inputNum" min="1"
+                           required>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="row">
+                <label for="inputBDate" class="col-md-12 col-form-label">印发日期</label>
+            </div>
+        </td>
+        <td>
+            <div class="row col-md-10">
+                <input type="date" class="form-control" id="inputBDate" name="inputBDate" min=2000-01-01
+                       max=2064-12-31 required>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <label for="inputSendto" class="col-form-label">主送单位</label>
+            </div>
+        </td>
+        <td>
+            <div class="col-9">
+                <input type="text" class="form-control" id="inputSendto" name="inputSendto"
+                       required>
+            </div>
+        </td>
+        <td>
+            <div class="row">
+                <label for="inputType" class="col-form-label">文种类别</label>
+            </div>
+        </td>
+        <td>
+            <div class="row col-md-10">
+                <select class="form-select" id="inputType" name="inputType" required>
+                    <option value=""></option>
+                    <option value="通知">通知</option>
+                    <option value="请示">请示</option>
+                    <option value="意见">意见</option>
+                    <option value="报告">报告</option>
+                    <option value="函">函</option>
+                    <option value="批复">批复</option>
+                    <option value="纪要">纪要</option>
+                    <option value="决议">决议</option>
+                    <option value="决定">决定</option>
+                    <option value="命令（令）">命令（令）</option>
+                    <option value="公报">公报</option>
+                    <option value="公告">公告</option>
+                    <option value="通告">通告</option>
+                    <option value="通报">通报</option>
+                    <option value="议案">议案</option>
+                    <option value="其他未知">其他未知</option>
+                    <option value="领导批文">领导批文</option>
+                </select>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="inputMemo" class="col-form-label ">备注内容</label>
+        </td>
+        <td>
+            <div class="col-9">
+                <input type="text" class="form-control" id="inputMemo" name="inputMemo">
+            </div>
+        </td>
+        <td>
+            <label for="inputPublic" class="col-form-label">信息公开选项</label>
+        </td>
+        <td>
+
+            <div class="row col-md-10">
+                <select class="form-select" id="inputPublic" name="inputPublic" required>
+                    <option value="主动公开" selected>主动公开</option>
+                    <option value="依申请公开">依申请公开</option>
+                    <option value="不予公开">不予公开</option>
+                </select>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="fileblob" class="col-form-label ">添加正文文档</label>
+        </td>
+        <td>
+            <div class="col-9">
+                <input type="file" class="form-control" id="fileblob" name="fileblob" autocomplete="off"
+                       accept=".pdf, .jpg, .bmp, .png, .gif, .rar, .zip, .doc, .docx">
+            </div>
+        </td>
+        <td>
+            <div class="col-12">
+                <label for="miji" class="col-12 col-form-label">文件密级</label>
+            </div>
+        </td>
+        <td>
+            <div class="row col-10">
+                <select class="form-select" id="miji" name="miji">
+                    <option value="">无</option>
+                    <option value="绝密">绝密</option>
+                    <option value="机密">机密</option>
+                    <option value="秘密">秘密</option>
+                </select>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="fileblob1" class="col-form-label ">添加附件</label>
+        </td>
+        <td>
+            <div class="col-9">
+                <input type="file" class="form-control" id="fileblob1" name="fileblob1" autocomplete="off"
+                       accept=".pdf, .jpg, .bmp, .png, .gif, .rar, .zip, .doc, .docx">
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>

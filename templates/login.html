@@ -39,7 +39,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="control relative">
+                    <div class="control relative mt-1">
                         <i class="myfal center-v">
                             <svg t="1610979190053" class="icon" viewBox="0 0 1024 1024" version="1.1"
                                  xmlns="http://www.w3.org/2000/svg" p-id="10822" width="16" height="16">
@@ -53,7 +53,7 @@
                             <option value=""></option>
                         </select>
                     </div>
-                    <div class="">
+                    <div class="mt-1">
                         <div class="control relative">
                             <i class="myfal center-v">
                                 <svg t="1610979036803" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -63,16 +63,10 @@
                                 </svg>
                             </i>
                             <input class="form-control pl6" type="password" name="password" placeholder="请输入密码"
-                                   required>
+                                   maxlength="12" minlength="1" pattern="[0-9a-zA-Z]{1,12}" required>
                         </div>
                     </div>
-                    <div class="checkbox mt-2 mb-4">
-                        <label class="text-muted">
-                            <input type="checkbox" value="remember-me">
-                            Remember me
-                        </label>
-                    </div>
-                    <div class="text-center">
+                    <div class="text-center mt-3">
                         <button class="btn btn-success btn-lg text-center" style="width:70%">Login</button>
                     </div>
                 </form>

@@ -9,6 +9,7 @@ from flask_login import UserMixin
 配置变动：
 1.SQL数据库varchar字段全部更新为nvarchar
 2.调整主记录的部门归属区分方式
+3.Login表的inUse和isValid修改为nchar5
 """
 
 
@@ -73,7 +74,7 @@ class Flaskdemo(Base):
 # 附件文档表
 class Filetable(Base):
     __tablename__ = 'FileTable'
-    id = Column('fieldid', Integer, primary_key=True, autoincrement=False)
+    id = Column('fieldid', Integer, primary_key=True)
     filename = Column('filename', String(100))
     filename1 = Column('filename1', String(100))
     filename2 = Column('filename2', String(100))
@@ -90,7 +91,7 @@ class Qrymaininfo(Base):
     # 指定映射表名
     __tablename__ = 'maininfo'
     # id 设置为主键
-    id = Column('fileid', Integer, primary_key=True, autoincrement=True, nullable=False)
+    id = Column('fileid', Integer, primary_key=True, nullable=False)
     filenumber = Column('filenumber', String(30), nullable=True)
     miji = Column('miji', String(4), nullable=True)
     title = Column('title', String(300), nullable=False)

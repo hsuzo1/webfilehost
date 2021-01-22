@@ -4,7 +4,7 @@ from io import BytesIO
 from flask import Flask, render_template, url_for, request, redirect, send_file, jsonify, \
     session, make_response, flash
 from sqlalchemy.orm import sessionmaker
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, fresh_login_required
 import pandas as pd
 from pandas import ExcelWriter
 from sqlalchemy import or_, cast, VARBINARY, text
@@ -17,7 +17,9 @@ from datetime import timedelta
 1.添加登录、注销功能 
     2021.1.13完成
 2.添加管理员面板：人员、部门、文档权限
+    2021.1.22完成
 3.添加管理员删除附件按钮
+
 """
 
 app = Flask(__name__)
@@ -28,6 +30,9 @@ app.config['MAX_CONTENT_LENGTH'] = 6 * 1024 * 1024  # 限制上传的文件最�
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.login_message = u"请登录"
+login_manager.refresh_view = 'login'  # relogin
+login_manager.needs_refresh_message = u"登录后空闲超过10分钟，请重新登录。"
+login_manager.needs_refresh_message_category = "info"
 login_manager.init_app(app)
 
 path = os.getcwd()
@@ -99,22 +104,21 @@ def login():
         # 返回的是用户登录时的LoginNo
         userId = request.form.get('usernames')
         password = request.form.get('password')
-        remember = True if request.form.get('remember') else False
         user = dbsession.query(User).filter(User.id == userId).filter(
-            or_(User.inUse == None, User.inUse != 'N')).first()
+            or_(User.inUse is None, User.inUse != 'N')).first()
         if not user or not (user.password.decode() == password):
             flash('登录信息错误，请重试。')
             return redirect(url_for('login'))
-        login_user(user, remember=remember)
-        session['userName'] = user.username
-        session['deptName'] = dept.deptName
-        session['fileHeader'] = dept.fileHeader
+        login_user(user, remember=False)
+        session['userName'] = user.username.strip()
+        session['deptName'] = dept.deptName.strip()
+        session['fileHeader'] = dept.fileHeader.strip()
         if user.canUpdate is not None:
-            session['canUpdate'] = user.canUpdate
+            session['canUpdate'] = user.canUpdate.strip()
         else:
             session['canUpdate'] = 'N'
         session.permanent = True
-        app.permanent_session_lifetime = timedelta(minutes=30)
+        app.permanent_session_lifetime = timedelta(minutes=10)
         return redirect(url_for('index'))
     tasks = dbsession.query(Dept).all()
     # password = str.encode(encoding="gb2312") utf-8
@@ -233,6 +237,21 @@ def qry():
         return render_template('query.html', tasks=tasks, dept=deptName, userName=userName, canUpdate=canUpdate)
     else:
         return render_template('query.html')
+
+
+# 删除发文记录的附件文档
+@app.route('/emptyFile', methods=['POST'])
+@fresh_login_required
+def empty_file():
+    id = request.form['fileid'].strip()
+    file_to_delete = dbsession.query(Filetable).filter(Filetable.id == id).one()
+    dbsession.delete(file_to_delete)
+    dbsession.commit()
+    update_record = dbsession.query(Qrymaininfo).filter(Qrymaininfo.id == id).first()
+    update_record.mainfile = "无"
+    update_record.mainfile1 = "无"
+    dbsession.commit()
+    return jsonify({'msg': id + '处理完成'})
 
 
 # 重置输入内容
@@ -412,6 +431,24 @@ def add():
     return render_template('new.html', tasks=tasks)
 
 
+# 对已登记的文件信息进行修改
+@app.route('/modify/<int:id>', methods=['GET', 'POST'])
+def modify_record(id):
+    task = dbsession.query(Qrymaininfo).filter(Qrymaininfo.id == id).one()
+    if request.method == 'POST':
+        task.title = request.form['inputTitle']
+        task.sendto = request.form['inputSendto']
+        task.ftype = request.form['inputType']
+        task.crtime = request.form['inputBDate']
+        task.memo1 = request.form['inputMemo']
+        task.xxgk = request.form['inputPublic']
+        task.miji = request.form['miji']
+        dbsession.commit()
+        return redirect(url_for('qry'))
+    else:
+        return render_template('modify.html', task=task)
+
+
 # 刷新最新文号
 @app.route('/getMaxNum', methods=['POST'])
 def getMaxNum():
@@ -455,7 +492,7 @@ def setting():
 
 # 用户密码修改
 @app.route('/updatePassword', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def updatePassword():
     if request.method == 'POST':
         newPwd = request.form['password']
@@ -470,7 +507,7 @@ def updatePassword():
 
 # 部门科室信息设置
 @app.route('/unit', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def setUnit():
     if request.method == 'POST':
         if request.form['deptNo'] != '' and request.form['deptName'] != '':
@@ -479,7 +516,7 @@ def setUnit():
             try:
                 task = dbsession.query(Dept).filter(Dept.id == id).first()
                 task.deptName = deptName
-                task.fileHeader = request.form['fileHeader']
+                task.fileHeader = request.form['fileHeader'].replace('，', ',')
                 dbsession.commit()
                 flash({"type": "alert-success", "msg": "科室信息修改成功！"})
             except:
@@ -512,7 +549,7 @@ def addNewDept():
 
 # 用户维护模块
 @app.route('/user-manage', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def user_manage():
     tasks = dbsession.query(User).from_statement(text(
         "SELECT [Login].[LoginNo] AS [Login_LoginNo], [Login].[LoginName] AS [Login_LoginName],"
@@ -530,7 +567,7 @@ def user_manage():
 
 # 新增用户
 @app.route('/addNewUser/<string:tag>', methods=['POST'])
-@login_required
+@fresh_login_required
 def addNewUser(tag):
     username = request.form['username']
     password = request.form['password']
@@ -540,6 +577,7 @@ def addNewUser(tag):
     inUse = request.form['status']
     canUpdate = request.form['userLevel']
     userRange = request.form['userRange']
+    msg = ''
     if tag == 'add':
         new_id = dbsession.query(User.id).order_by(User.id.desc()).first().id + 1
         add_new = User(id=new_id, username=username, password=converted_password, deptNo=deptNo.id, inUse=inUse, canUpdate=canUpdate,
@@ -548,7 +586,7 @@ def addNewUser(tag):
         msg = '新增用户【' + username + '】'
     elif tag == 'modify':
         id = request.form['user_id']
-        task = dbsession.query(User).filter(User.id==id).first()
+        task = dbsession.query(User).filter(User.id == id).first()
         task.username = username
         task.password = converted_password
         task.deptNo = deptNo.id
@@ -571,7 +609,7 @@ def addNewUser(tag):
 
 # 删除用户
 @app.route('/remove/<int:id>', methods=['POST', 'GET'])
-@login_required
+@fresh_login_required
 def remove_user(id):
     if id:
         task_to_delete = dbsession.query(User).filter(User.id == id).one()
@@ -586,13 +624,9 @@ def remove_user(id):
 
 
 @app.before_request
-def before_request_a():
-    print('I am in before_request_a')
-
-
-@app.before_request
-def before_request_b():
-    print('I am in before_request_b')
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=10)
 
 
 @app.after_request

@@ -269,6 +269,7 @@ window.onload=function(){
     //修改-用户信息
     function update(id) {
         $("#btn_add").attr('disabled', true);
+        $('#btn_update').attr('disabled', false);
         var username = $('#username' + id).text();
         var password = $('#password' + id).text();
         var deptName = $('#deptName' + id).text().trim();
@@ -296,15 +297,14 @@ window.onload=function(){
             $('#userLevel').val('');
         }
         $('#userRange').val(userRange);
-        //选中已有权限科室名称
+        //自动勾选上已有权限科室名称
         $('input:checkbox').prop("checked",false);
         var arr=userRange.split(",");
-        if (arr.length > 1){
+        if (arr.length > 0){
             for(var i=0;i<arr.length;i++){
                 $('input[value='+ arr[i]+']').prop("checked",true);
             }
         }
-        $('#btn_update').removeAttr("disabled");;
     };
 
 // 删除用户
@@ -321,26 +321,21 @@ function removeUser(){
 //click更新能查看的部门名称
 function updateUnit(id){
     var bool = $("#"+id).prop("checked");
-    var chktext = $("#"+ id).val()
-    var current_val = $('#userRange').val();
+    var chktext = $("#"+ id).val();
+    var new_txt = ''
+    var current_val_array = $('#userRange').val().split(',');
     if (bool){
-        if (current_val===''){
-            $('#userRange').val(chktext);
+        if (current_val_array==''){
+            new_txt = chktext;
         } else {
-            $('#userRange').val(current_val + ',' +chktext);
+            current_val_array.push(chktext);
+            new_txt = current_val_array.join();
         }
     } else {
-        var idx = current_val.indexOf(chktext);
-        if (idx==0){
-            newtxt = current_val.replace( chktext+',', '');
-        } else {
-            newtxt = current_val.replace( ','+chktext, '');
-        }
-        $('#userRange').val( newtxt );
-        if ($('#userRange').val() === chktext){
-            $('#userRange').val('');
-        }
+        current_val_array.splice(jQuery.inArray(chktext,current_val_array),1);
+        new_txt = current_val_array.join();
     }
+    $('#userRange').val(new_txt);
 }
 
    //全选和全不选函数

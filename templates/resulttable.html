@@ -43,7 +43,7 @@
         <th class="sticky-top tf" scope="col">附件文档</th>
         <th class="sticky-top tf" scope="col">备注</th>
         {% if request.path == '/qry' %}
-        <th class="sticky-top tf" scope="col">修改</th>
+        <th class="sticky-top tf" scope="col">记录维护</th>
         {% endif %}
     </tr>
     </thead>
@@ -62,17 +62,19 @@
         <td class="text-center">{{task.xxgk}}</td>
         <td class="text-center">
             {% if task.mainfile|striptags !="无" %}
-            <a href="/mainfile/{{task.id}}" style="display:block">
-                <button class="btn btn-success btn-sm" type="button">查看</button>
-            </a>
+            {% set tag="block" %}
+            {% set tag_up="none" %}
             {% else %}
-            <a href="/mainfile/{{task.id}}" style="display:none" id="view_main{{task.id}}">
+            {% set tag="none" %}
+            {% set tag_up="block" %}
+            {% endif %}
+            <a href="/mainfile/{{task.id}}" style="display:{{tag}}" id="view_main{{task.id}}">
                 <button class="btn btn-success btn-sm" type="button">查看</button>
             </a>
-            {% if dept == task.operdept %}
+            {% if (dept == task.operdept) or (canUpdate == "A") or (canUpdate == "S") %}
             <form action="/upload/main/{{task.id}}" id="upload_main{{task.id}}" name="uploadMain{{task.id}}"
                   method="POST"
-                  enctype="multipart/form-data" style="display:block">
+                  enctype="multipart/form-data" style="display:{{tag_up}}">
                 <label class="btn btn-secondary btn-sm" for="file{{task.id}}" id="btn{{task.id}}">上传</label>
                 <input type="file" name="main{{task.id}}" id="file{{task.id}}" style="display:none"
                        onchange="ajaxForm('upload_main{{task.id}}', '{{task.id}}', 'main')();"
@@ -81,21 +83,22 @@
                        required/>
             </form>
             {% endif %}
-            {% endif %}
         </td>
         <td class="text-center">
             {% if task.mainfile1|striptags !="无" %}
-            <a href="/mainfile1/{{task.id}}">
-                <button class="btn btn-success btn-sm" type="button">查看</button>
-            </a>
+            {% set tag="block" %}
+            {% set tag_up="none" %}
             {% else %}
-            <a href="/mainfile1/{{task.id}}" style="display:none" id="view_attach{{task.id}}">
+            {% set tag="none" %}
+            {% set tag_up="block" %}
+            {% endif %}
+            <a href="/mainfile1/{{task.id}}" style="display:{{tag}}"  id="view_attach{{task.id}}">
                 <button class="btn btn-success btn-sm" type="button">查看</button>
             </a>
-            {% if dept == task.operdept %}
+            {% if (dept == task.operdept) or (canUpdate == "A") or (canUpdate == "S") %}
             <form action="/upload/attach/{{task.id}}" id="upload_attach{{task.id}}" name="uploadAttach{{task.id}}"
                   method="POST"
-                  enctype="multipart/form-data" style="display:block">
+                  enctype="multipart/form-data" style="display:{{tag_up}}">
                 <label class="btn btn-secondary btn-sm" for="attach{{task.id}}" id="btn_attach{{task.id}}">上传</label>
                 <input type="file" name="attach{{task.id}}" id="attach{{task.id}}" style="display:none"
                        onchange="ajaxForm('upload_attach{{task.id}}', '{{task.id}}', 'attach')();"
@@ -104,14 +107,13 @@
                        required/>
             </form>
             {% endif %}
-            {% endif %}
         </td>
         <td>{{task.memo1}}</td>
         {% if request.path == '/qry' %}
         <td class="text-center">
-            {% if (userName == task.creater) or (canUpdate == "A") %}
-            <a href="#">
-                <button class="btn btn-danger btn-sm" type="button">修改</button>
+            {% if (userName == task.creater) or (canUpdate == "A") or (canUpdate == "S") %}
+            <a href="/modify/{{task.id}}" class="btn btn-danger btn-sm" type="button">修改</a>
+            <a class="btn btn-danger btn-sm" type="button" onclick="askOperation({{task.id}});">清除附件
             </a>
             {% endif %}
         </td>

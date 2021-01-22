@@ -107,6 +107,32 @@ function getFileSize(obj) {
         }
         return true;
 }
+//删除附件
+function askOperation(id){
+    var r=confirm("您确定要删除掉该发文记录的所有附件吗？");
+    if (r==true) {
+        $.ajax({
+            url:"/emptyFile",
+            type:"POST",
+            data: {
+                fileid: id
+                },
+            dataType: 'json',
+            success:function(data){
+                    $('#upload_main' + id).attr("style", "display:block;");
+                    $('#upload_attach' + id).attr("style", "display:block;");
+                    $('#view_main' + id).attr("style", "display:none;");
+                    $('#view_attach' + id).attr("style", "display:none;");
+                    console.log(data.msg);
+            },
+            error:function(data){
+                    alert(data.msg);
+            }
+        });
+    } else {
+        return false;
+    }
+}
 </script>
 
 
